@@ -52,11 +52,12 @@ jobs:
       context: ${{ matrix.dir }}
 
   docker-build-and-push:
-    if: ${{ needs.determine-relevant-dirs.outputs.changed_directories != '' }} && github.event_name == 'push' && github.ref == 'refs/heads/main' # Only run on push to main
+    if: ${{ needs.determine-relevant-dirs.outputs.changed_directories != '' }} && ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }} # Only run on push to main
     strategy:
       matrix: ${{fromJson(needs.determine-relevant-dirs.outputs.changed_directories)}}
     needs:
       - test-and-build
+      - determine-relevant-dirs
     uses: ./.github/workflows/docker-build-and-push.template.yml
     with:
       context: ${{ matrix.dir }}
