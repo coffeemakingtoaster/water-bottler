@@ -36,6 +36,11 @@ jobs:
           dir_names_max_depth: 1  
           json: true
           quotepath: false
+          files: |
+            authentication-service/**/*
+            download-service/**/*
+            notification-service/**/*
+            upload-service/**/*
 
       - name: 'Set output in the matrix format'
         id: set-output
