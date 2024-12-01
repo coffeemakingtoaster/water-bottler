@@ -26,7 +26,7 @@ jobs:
       context: ${{ matrix.dir }}
 
   docker-build-and-push:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' # Only run on push to main
+    if: ${{github.event_name == 'push'}} && ${{github.ref == 'refs/heads/main'}} # Only run on push to main
     strategy:
       matrix: 
         dir:
