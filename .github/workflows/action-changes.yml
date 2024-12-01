@@ -1,0 +1,41 @@
+name: GH actions change
+
+on:
+  pull_request:
+    branches:
+      - 'main'
+    paths:
+      - '.github/**/*'
+  push:
+    branch:
+      - 'main'
+    paths:
+      - '.github/**/*'
+
+jobs:
+  test-and-build:
+    strategy:
+      matrix: 
+        dir:
+          - authentication-service
+          - download-service
+          - notification-service
+          - upload-service
+    uses: ./.github/workflows/go-service.template.yml
+    with:
+      context: ${{ matrix.dir }}
+
+  docker-build-and-push:
+    if: ${{github.event_name == 'push' && github.ref == 'refs/heads/main'}} # Only run on push to main
+    strategy:
+      matrix: 
+        dir:
+          - authentication-service
+          - download-service
+          - notification-service
+          - upload-service
+    needs:
+      - test-and-build
+    uses: ./.github/workflows/docker-build-and-push.template.yml
+    with:
+      context: ${{ matrix.dir }}
