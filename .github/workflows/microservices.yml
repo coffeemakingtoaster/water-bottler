@@ -1,0 +1,63 @@
+name: go based microservice 
+
+on:
+  pull_request:
+    branches:
+      - 'main'
+    paths:
+      - 'authentication-service/**/*'
+      - 'download-service/**/*'
+      - 'notification-service/**/*'
+      - 'upload-service/**/*'
+  push:
+    branch:
+      - 'main'
+    paths:
+      - 'authentication-service/**/*'
+      - 'download-service/**/*'
+      - 'notification-service/**/*'
+      - 'upload-service/**/*'
+
+jobs:
+  determine-relevant-dirs:
+    runs-on: ubuntu-latest
+    outputs:
+      changed_directories: ${{ steps.set-output.outputs.changed_directories }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v45
+        with:
+          dir_names: true
+          dir_names_max_depth: 1  
+          json: true
+          quotepath: false
+
+      - name: 'Set output in the matrix format'
+        id: set-output
+        run: echo "changed_directories={\"dir\":${{ steps.changed-files.outputs.all_changed_files }}}" >> "$GITHUB_OUTPUT"
+
+  test-and-build:
+    if: ${{ needs.determine-relevant-dirs.outputs.changed_directories != '' }}  
+    strategy:
+      matrix: ${{fromJson(needs.determine-relevant-dirs.outputs.changed_directories)}}
+    needs:
+      - determine-relevant-dirs 
+    uses: ./.github/workflows/go-service.template.yml
+    with:
+      context: ${{ matrix.dir }}
+
+  docker-build-and-push:
+    if: ${{ needs.determine-relevant-dirs.outputs.changed_directories != '' }} && github.event_name == 'push' && github.ref == 'refs/heads/main' # Only run on push to main
+    strategy:
+      matrix: ${{fromJson(needs.determine-relevant-dirs.outputs.changed_directories)}}
+    needs:
+      - test-and-build
+    needs: tests
+    uses: ./.github/workflows/docker-build-and-push.template.yml
+    with:
+      context: ${{ matrix.dir }}
