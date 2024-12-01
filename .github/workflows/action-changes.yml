@@ -36,7 +36,6 @@ jobs:
           - upload-service
     needs:
       - test-and-build
-    needs: tests
     uses: ./.github/workflows/docker-build-and-push.template.yml
     with:
       context: ${{ matrix.dir }}
