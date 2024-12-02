@@ -1,3 +1,5 @@
+#!/bin/bash
+
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -29,4 +31,29 @@ done
 
 echo "${GREEN}Services build. All images available in your cluster are displayed below:${NC}"
 minikube image ls --format='table'
-exit 0
+if [ "$1" != "deploy" ]; then
+    echo "Skipping deployment"
+    exit 0
+fi 
+
+CURRENT_CONTEXT=$(kubectl config current-context)
+if [ "$CURRENT_CONTEXT" != "minikube" ]; then
+    echo "${RED}The current kubectl context is NOT minikube! This script and application are not meant for production clusters as of now!${NC}"
+    exit 1
+fi
+
+minikube addons enable ingress
+
+for dir in "${SERVICE_DIRECORIES[@]}"; do
+	echo "Starting build for ${PURPLE}${dir}${NC}"
+	if [ ! -f $dir/deployment.yaml ]; then
+    		echo "${YELLOW}No Deployment for ${dir}! Skipping service...${NC}"
+	else
+		(cd $dir && kubectl apply -f ./deployment.yaml)
+		echo "${GREEN}Deployment for ${PURPLE}${dir}${GREEN} done!${NC}"
+	fi
+done
+
+echo "Done deploying"
+echo "The api endpoint is accessible here:"
+minikube service authentication-service --url

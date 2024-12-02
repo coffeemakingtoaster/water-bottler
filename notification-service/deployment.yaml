@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-service 
+spec:
+  selector:
+    matchLabels:
+      run: notification-service
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: notification-service
+    spec:
+      containers:
+      - name: notification-service
+        image: github.com/coffeemakingtoaster/water-bottler/notification-service:local
+        ports:
+        - containerPort: 8080
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification-service
+  labels:
+    run: notification-service 
+spec:
+  type: NodePort
+  ports:
+  - port: 8080
+    protocol: TCP
+  selector:
+    run: notification-service
