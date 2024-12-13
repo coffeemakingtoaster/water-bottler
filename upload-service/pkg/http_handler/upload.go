@@ -41,7 +41,6 @@ func HandleUpload(w http.ResponseWriter, r *http.Request) {
 	io.Discard.Write(fileBytes)
 
 	imageId := uuid.New().String()
-
 	userEmail := w.Header().Get(USER_EMAIL_HEADER)
 
 	// This likely means that the auth middleware was not called beforehand
