@@ -2,17 +2,14 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"net/http"
+
+	httphandler "github.com/coffeemakingtoaster/water-bottler/upload-service/pkg/http_handler"
 )
 
-func getHealth(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Got health request")
-	io.WriteString(w, "ok")
-}
-
 func main() {
-	http.HandleFunc("/health", getHealth)
+	http.HandleFunc("/health", httphandler.GetHealth)
+	http.HandleFunc("/upload", httphandler.ProtectWithApiKey(httphandler.HandleUpload))
 	fmt.Println("Starting upload service")
 	err := http.ListenAndServe(":8080", nil)
 	fmt.Printf("Server encountered error: %v", err)
