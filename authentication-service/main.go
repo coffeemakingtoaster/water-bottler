@@ -76,9 +76,7 @@ func main() {
 
 	// Set up the http server
 	http.HandleFunc("/health", getHealth)
-	http.HandleFunc("/checkKey", func(w http.ResponseWriter, r *http.Request) {
-		checkKey(w, r)
-	})
+	http.HandleFunc("/checkKey", checkKey)
 
 	// Start the server
 	interfaceIP := "0.0.0.0"
