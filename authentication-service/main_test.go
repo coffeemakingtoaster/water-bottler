@@ -30,7 +30,7 @@ func TestDateInFuture(t *testing.T) {
 }
 
 func TestCheckKey(t *testing.T) {
-	db = singleton.GetDatabaseInstance(dataBasePath)
+	db = singleton.GetDatabaseInstance("./db.yaml.examble")
 	var validKey string
 	var expiredKey string
 	for _, key := range db.ApiKeys {
