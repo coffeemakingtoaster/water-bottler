@@ -13,12 +13,14 @@ var (
 	once sync.Once
 )
 
+type ApiKey struct {
+	Name       string `yaml:"name"`       // E-Mail address of the user
+	Key        string `yaml:"key"`        // API key in no particular format, should only contain base64 characters and have a max length of 100
+	ValidUntil string `yaml:"validUntil"` // RFC3339 formatted date
+}
+
 type DataBaseSingleton struct {
-	ApiKeys []struct {
-		Name       string `yaml:"name"`       // E-Mail address of the user
-		Key        string `yaml:"key"`        // API key in no particular format, should only contain base64 characters and have a max length of 100
-		ValidUntil string `yaml:"validUntil"` // RFC3339 formatted date
-	} `yaml:"apiKeys"`
+	ApiKeys []ApiKey `yaml:"apiKeys"`
 }
 
 func GetDatabaseInstance(dbPath string) *DataBaseSingleton {
