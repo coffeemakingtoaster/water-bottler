@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"slices"
 
 	"github.com/coffeemakingtoaster/water-bottler/authentication-service/pkg/singleton"
 	"github.com/coffeemakingtoaster/water-bottler/authentication-service/pkg/utils"
@@ -49,23 +50,26 @@ func checkKey(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check if the api key is in the database
-	for _, key := range db.ApiKeys {
-		if key.Key == api_key {
-			// Check if the key is not expired
-			valid, err := utils.DateInFuture(key.ValidUntil)
-			if err != nil {
-				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-				return
-			}
+	indexOfKey := slices.IndexFunc(db.ApiKeys, func(key singleton.ApiKey) bool {
+		return key.Key == api_key
+	})
 
-			log.Info().Msgf("Api key for %v is valid: %v", key.Name, valid)
-			if valid {
-				fmt.Fprint(w, "valid")
-			} else {
-				fmt.Fprint(w, "invalid")
-			}
+	if indexOfKey != -1 {
+		key := db.ApiKeys[indexOfKey]
+		// Check if the key is not expired
+		valid, err := utils.DateInFuture(key.ValidUntil)
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
+
+		log.Info().Msgf("Api key for %v is valid: %v", key.Name, valid)
+		if valid {
+			fmt.Fprint(w, "valid")
+		} else {
+			fmt.Fprint(w, "invalid")
+		}
+		return
 	}
 	log.Info().Msg("Key not found")
 	fmt.Fprint(w, "invalid")
