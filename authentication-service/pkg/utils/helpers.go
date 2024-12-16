@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"regexp"
 	"time"
 
 	"github.com/rs/zerolog/log"
@@ -24,4 +25,10 @@ func DateInFuture[T string | time.Time](date T) (bool, error) {
 	}
 	// Check if the date is in the future
 	return validUntil.After(dateNow), nil
+}
+
+// Function to check if a string is base64
+func IsBase64(str string) bool {
+	base64Regex := regexp.MustCompile(`^[a-zA-Z0-9+\/]*={0,2}$`)
+	return base64Regex.MatchString(str)
 }

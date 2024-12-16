@@ -16,7 +16,7 @@ var (
 type DataBaseSingleton struct {
 	ApiKeys []struct {
 		Name       string `yaml:"name"`       // E-Mail address of the user
-		Key        string `yaml:"key"`        // API key in no particular format, with a max length of 100
+		Key        string `yaml:"key"`        // API key in no particular format, should only contain base64 characters and have a max length of 100
 		ValidUntil string `yaml:"validUntil"` // RFC3339 formatted date
 	} `yaml:"apiKeys"`
 }

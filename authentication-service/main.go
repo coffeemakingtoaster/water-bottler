@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
 
 	"github.com/coffeemakingtoaster/water-bottler/authentication-service/pkg/singleton"
 	"github.com/coffeemakingtoaster/water-bottler/authentication-service/pkg/utils"
@@ -43,9 +42,11 @@ func checkKey(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Remove any newlines or carriage returns from the api key, to ensure the string is a single line
-	api_key = strings.ReplaceAll(api_key, "\n", "")
-	api_key = strings.ReplaceAll(api_key, "\r", "")
+	// Check if the api key only contains base64 characters
+	if !utils.IsBase64(api_key) {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
 
 	// Check if the api key is in the database
 	for _, key := range db.ApiKeys {
