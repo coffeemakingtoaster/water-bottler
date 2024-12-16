@@ -61,7 +61,7 @@ func TestCheckKey(t *testing.T) {
 	}
 
 	t.Log("Check for non-existing key")
-	utils.TestHttpHandler(t, checkKey, "POST", strings.NewReader("non-existing-key"), 200, "invalid")
+	utils.TestHttpHandler(t, checkKey, "POST", strings.NewReader("nonExistingKey"), 200, "invalid")
 
 	t.Log("Check for invalid request")
 	utils.TestHttpHandler(t, checkKey, "POST", models.ErrorReader{}, 500, http.StatusText(500)+"\n")
