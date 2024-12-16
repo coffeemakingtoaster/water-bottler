@@ -1,0 +1,7 @@
+apiKeys:
+  - name: "jeff@water-bottler.local"
+    key: "amVmZnMtd2F0ZXItYm90dGxlci1leGFtcGxlLWFwaS1rZXk="
+    validUntil: "2036-12-31T23:59:59Z"
+  - name: "emañuel@water-bottler.local"
+    key: "ZW1hw7F1ZWwtd2F0ZXItYm90dGxlci1leGFtcGxlLWFwaS1rZXk="
+    validUntil: "1982-01-01T00:00:00Z"
