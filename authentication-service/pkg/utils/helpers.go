@@ -1,7 +1,10 @@
 package utils
 
 import (
+	"reflect"
 	"regexp"
+	"runtime"
+	"strings"
 	"time"
 
 	"github.com/rs/zerolog/log"
@@ -31,4 +34,11 @@ func DateInFuture[T string | time.Time](date T) (bool, error) {
 func IsBase64(str string) bool {
 	base64Regex := regexp.MustCompile(`^[a-zA-Z0-9+\/]*={0,2}$`)
 	return base64Regex.MatchString(str)
+}
+
+// Function to get the function name of a function
+func GetFunctionName(i interface{}) string {
+	fullFunctionName := runtime.FuncForPC(reflect.ValueOf(i).Pointer()).Name()
+	splittedFunctionName := strings.Split(fullFunctionName, ".")
+	return splittedFunctionName[len(splittedFunctionName)-1]
 }
