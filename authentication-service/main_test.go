@@ -30,6 +30,7 @@ func TestDateInFuture(t *testing.T) {
 }
 
 func TestCheckKey(t *testing.T) {
+	endpoint := "/checkKey"
 	db = singleton.GetDatabaseInstance("./db.yaml.examble")
 	var validKey string
 	var expiredKey string
@@ -50,19 +51,19 @@ func TestCheckKey(t *testing.T) {
 		t.Log("No valid key found, skipping test for a valid key")
 	} else {
 		t.Log("Check for valid key")
-		utils.TestHttpHandler(t, checkKey, "POST", strings.NewReader(validKey), 200, "valid")
+		utils.TestHttpHandler(t, checkKey, "POST", endpoint, strings.NewReader(validKey), 200, "valid")
 	}
 
 	if expiredKey == "" {
 		t.Log("No expired key found, skipping test for an expired key")
 	} else {
 		t.Log("Check for invalid key")
-		utils.TestHttpHandler(t, checkKey, "POST", strings.NewReader(expiredKey), 200, "invalid")
+		utils.TestHttpHandler(t, checkKey, "POST", endpoint, strings.NewReader(expiredKey), 200, "invalid")
 	}
 
 	t.Log("Check for non-existing key")
-	utils.TestHttpHandler(t, checkKey, "POST", strings.NewReader("nonExistingKey"), 200, "invalid")
+	utils.TestHttpHandler(t, checkKey, "POST", endpoint, strings.NewReader("nonExistingKey"), 200, "invalid")
 
 	t.Log("Check for invalid request")
-	utils.TestHttpHandler(t, checkKey, "POST", models.ErrorReader{}, 500, http.StatusText(500)+"\n")
+	utils.TestHttpHandler(t, checkKey, "POST", endpoint, models.ErrorReader{}, 500, http.StatusText(500)+"\n")
 }
