@@ -43,19 +43,19 @@ func TestCheckKey(t *testing.T) {
 			expiredKey = key
 		}
 		// Break if we have a valid and invalid key
-		if validKey.Key != "" && expiredKey.Key != "" {
+		if validKey != (singleton.ApiKey{}) && expiredKey != (singleton.ApiKey{}) {
 			break
 		}
 	}
 
-	if validKey.Key == "" {
+	if validKey == (singleton.ApiKey{}) {
 		t.Log("No valid key found, skipping test for a valid key")
 	} else {
 		t.Log("Check for valid key")
 		utils.TestHttpHandler(t, checkKey, "POST", endpoint, strings.NewReader(validKey.Key), 200, fmt.Sprintf(`{"status":"valid","email":"%s"}`, validKey.Name))
 	}
 
-	if expiredKey.Key == "" {
+	if expiredKey == (singleton.ApiKey{}) {
 		t.Log("No expired key found, skipping test for an expired key")
 	} else {
 		t.Log("Check for invalid key")
