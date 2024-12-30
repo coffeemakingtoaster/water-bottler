@@ -1,6 +1,7 @@
 package httphandler
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -16,6 +17,11 @@ type CachedApiKey struct {
 
 type ApiKeyCache struct {
 	cache map[string]CachedApiKey
+}
+
+type KeyCheckResponse struct {
+	Status string `json:"status"`
+	Email  string `json:"email"`
 }
 
 var AuthApiUrl string
@@ -71,12 +77,15 @@ func validateAPIKeyViaAuthService(key string) (string, error) {
 		fmt.Printf("Got invalid response code %d\n", res.StatusCode)
 		return "", errors.New("Got unexpected response code")
 	}
+	var resp KeyCheckResponse
 
-	if body, _ := io.ReadAll(res.Body); string(body) != wantedBody {
-		t.Errorf("%s() = %v; want %v", GetFunctionName(handler), string(body), wantedBody)
+	json.NewDecoder(res.Body).Decode(&resp)
+
+	if resp.Status != "valid" {
+		return "", nil
 	}
 
-	return "", nil
+	return resp.Email, nil
 }
 
 func hasValidApiKey(r *http.Request) (bool, string) {
