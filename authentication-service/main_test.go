@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 	"testing"
@@ -32,37 +33,37 @@ func TestDateInFuture(t *testing.T) {
 func TestCheckKey(t *testing.T) {
 	endpoint := "/checkKey"
 	db = singleton.GetDatabaseInstance("./db.yaml.examble")
-	var validKey string
-	var expiredKey string
+	var validKey singleton.ApiKey
+	var expiredKey singleton.ApiKey
 	for _, key := range db.ApiKeys {
 		validUntil, _ := time.Parse(time.RFC3339, key.ValidUntil)
 		if validUntil.After(time.Now()) {
-			validKey = key.Key
+			validKey = key
 		} else {
-			expiredKey = key.Key
+			expiredKey = key
 		}
 		// Break if we have a valid and invalid key
-		if validKey != "" && expiredKey != "" {
+		if validKey != (singleton.ApiKey{}) && expiredKey != (singleton.ApiKey{}) {
 			break
 		}
 	}
 
-	if validKey == "" {
+	if validKey == (singleton.ApiKey{}) {
 		t.Log("No valid key found, skipping test for a valid key")
 	} else {
 		t.Log("Check for valid key")
-		utils.TestHttpHandler(t, checkKey, "POST", endpoint, strings.NewReader(validKey), 200, "valid")
+		utils.TestHttpHandler(t, checkKey, "POST", endpoint, strings.NewReader(validKey.Key), 200, fmt.Sprintf(`{"status":"valid","email":"%s"}`, validKey.Name))
 	}
 
-	if expiredKey == "" {
+	if expiredKey == (singleton.ApiKey{}) {
 		t.Log("No expired key found, skipping test for an expired key")
 	} else {
 		t.Log("Check for invalid key")
-		utils.TestHttpHandler(t, checkKey, "POST", endpoint, strings.NewReader(expiredKey), 200, "invalid")
+		utils.TestHttpHandler(t, checkKey, "POST", endpoint, strings.NewReader(expiredKey.Key), 200, `{"status":"invalid","email":""}`)
 	}
 
 	t.Log("Check for non-existing key")
-	utils.TestHttpHandler(t, checkKey, "POST", endpoint, strings.NewReader("nonExistingKey"), 200, "invalid")
+	utils.TestHttpHandler(t, checkKey, "POST", endpoint, strings.NewReader("nonExistingKey"), 200, `{"status":"invalid","email":""}`)
 
 	t.Log("Check for invalid request")
 	utils.TestHttpHandler(t, checkKey, "POST", endpoint, models.ErrorReader{}, 500, http.StatusText(500)+"\n")

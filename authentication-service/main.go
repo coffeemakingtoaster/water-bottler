@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -15,6 +16,11 @@ var (
 	dataBasePath string = "./db.yaml" // Hardcoded path to the db.yaml file
 	db           *singleton.DataBaseSingleton
 )
+
+type KeyCheckResponse struct {
+	Status string `json:"status"`
+	Email  string `json:"email"`
+}
 
 // get request to /health
 func getHealth(w http.ResponseWriter, r *http.Request) {
@@ -54,6 +60,9 @@ func checkKey(w http.ResponseWriter, r *http.Request) {
 		return key.Key == api_key
 	})
 
+	responseMail := ""
+	responseStatus := "invalid"
+
 	if indexOfKey != -1 {
 		key := db.ApiKeys[indexOfKey]
 		// Check if the key is not expired
@@ -65,14 +74,18 @@ func checkKey(w http.ResponseWriter, r *http.Request) {
 
 		log.Info().Msgf("Api key for %v is valid: %v", key.Name, valid)
 		if valid {
-			fmt.Fprint(w, "valid")
-		} else {
-			fmt.Fprint(w, "invalid")
+			responseStatus = "valid"
+			responseMail = key.Name
 		}
+	}
+
+	responseData, err := json.Marshal(KeyCheckResponse{Status: responseStatus, Email: responseMail})
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	log.Info().Msg("Key not found")
-	fmt.Fprint(w, "invalid")
+	w.Header().Add("Content-Type", "application/json")
+	w.Write(responseData)
 }
 
 func main() {
