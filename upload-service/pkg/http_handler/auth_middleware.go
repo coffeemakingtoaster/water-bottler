@@ -2,7 +2,10 @@ package httphandler
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
+	"os"
+	"strings"
 	"time"
 )
 
@@ -15,12 +18,23 @@ type ApiKeyCache struct {
 	cache map[string]CachedApiKey
 }
 
+var AuthApiUrl string
+
+var httpClient = http.Client{}
+
 // How long can an api key be cached before we throw it out
 const API_KEY_TTL = time.Minute * 2
 
 const USER_EMAIL_HEADER = "X-user-mail"
 
 var apiKeyCache = ApiKeyCache{map[string]CachedApiKey{}}
+
+func init() {
+	AuthApiUrl = os.Getenv("AUTH_SERVICE_URL")
+	if len(AuthApiUrl) == 0 {
+		panic("No value for auth service url passed via env.")
+	}
+}
 
 func (akc *ApiKeyCache) retrieveValidKey(key string) (string, error) {
 	val, ok := akc.cache[key]
@@ -41,10 +55,28 @@ func (akc *ApiKeyCache) addKeyToCache(key, mail string) {
 }
 
 func validateAPIKeyViaAuthService(key string) (string, error) {
-	if key == "aaaaa" {
-		return "test@test.de", nil
+
+	fmt.Println(key)
+	requestUrl := fmt.Sprintf("%s/checkKey", AuthApiUrl)
+
+	req, err := http.NewRequest("POST", requestUrl, strings.NewReader(key))
+	if err != nil {
+		fmt.Printf("Could init request to auth service with url %s %v", requestUrl, err)
+		return "", err
 	}
-	return "", errors.New("Invalid API key")
+
+	res, err := httpClient.Do(req)
+
+	if res.StatusCode != http.StatusOK || err != nil {
+		fmt.Printf("Got invalid response code %d\n", res.StatusCode)
+		return "", errors.New("Got unexpected response code")
+	}
+
+	if body, _ := io.ReadAll(res.Body); string(body) != wantedBody {
+		t.Errorf("%s() = %v; want %v", GetFunctionName(handler), string(body), wantedBody)
+	}
+
+	return "", nil
 }
 
 func hasValidApiKey(r *http.Request) (bool, string) {
