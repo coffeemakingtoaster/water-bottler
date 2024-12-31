@@ -8,6 +8,8 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	customerror "github.com/coffeemakingtoaster/water-bottler/upload-service/pkg/custom_error"
 )
 
 type CachedApiKey struct {
@@ -76,14 +78,14 @@ func validateAPIKeyViaAuthService(key string) (string, error) {
 
 	if res == nil || err != nil {
 		fmt.Println("Could not complete request")
-		return "", errors.New("Got unexpected response code")
-
+		return "", &customerror.SystemCommunicationError{Reason: "Could not comlete request"}
 	}
 
 	if res.StatusCode != http.StatusOK {
 		fmt.Printf("Got invalid response code %d\n", res.StatusCode)
-		return "", errors.New("Got unexpected response code")
+		return "", &customerror.SystemCommunicationError{Reason: fmt.Sprintf("Got invalid response code %d", res.StatusCode)}
 	}
+
 	var resp KeyCheckResponse
 
 	json.NewDecoder(res.Body).Decode(&resp)
@@ -95,38 +97,50 @@ func validateAPIKeyViaAuthService(key string) (string, error) {
 	return resp.Email, nil
 }
 
-func hasValidApiKey(r *http.Request) (bool, string) {
+func hasValidApiKey(r *http.Request) (bool, string, error) {
 	apiKey := r.Header.Get("X-API-KEY")
 
 	if len(apiKey) == 0 {
-		return false, ""
+		return false, "", nil
 	}
 
 	// Do we have a valid entry cached?
 	mail, err := apiKeyCache.retrieveValidKey(apiKey)
 	if err == nil {
-		return true, mail
+		return true, mail, nil
 	}
 
 	mail, err = validateAPIKeyViaAuthService(apiKey)
 	if err == nil {
 		apiKeyCache.addKeyToCache(apiKey, mail)
-		return true, mail
+		return true, mail, nil
 	}
 
-	return false, ""
+	return false, "", err
 }
 
 func ProtectWithApiKey(handler HandlerFunc) HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		ok, mail := hasValidApiKey(r)
+		ok, mail, err := hasValidApiKey(r)
 
-		// save for later stages
-		r.Header.Add(USER_EMAIL_HEADER, mail)
+		if err != nil {
+			switch err.(type) {
+			case *customerror.SystemCommunicationError:
+				w.WriteHeader(http.StatusInternalServerError)
+			default:
+				w.WriteHeader(http.StatusUnauthorized)
+			}
+			return
+		}
+
 		if !ok {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
+
+		// save for later stages
+		r.Header.Add(USER_EMAIL_HEADER, mail)
+
 		handler(w, r)
 	}
 }

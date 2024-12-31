@@ -44,7 +44,7 @@ func stopMockAuthService(wg *sync.WaitGroup, srv *http.Server) {
 	wg.Wait()
 }
 
-func checkStatusCodeAndCalledCount(t *testing.T, expectedStatusCode, actualStatusCode, expectedCalledCount, actualCalledCount int) {
+func checkStatusCodeAndCalledCount(t *testing.T, actualStatusCode, expectedStatusCode, actualCalledCount, expectedCalledCount int) {
 	if actualStatusCode != expectedStatusCode {
 		t.Errorf("Expected Response of %d but got %d", expectedStatusCode, actualStatusCode)
 	}
@@ -137,8 +137,8 @@ func TestUnreachableAuthService(t *testing.T) {
 	protectedHandler := ProtectWithApiKey(func(w http.ResponseWriter, r *http.Request) {
 		calledCount++
 	})
-	protectedHandler(w, httptest.NewRequest(http.MethodGet, "/", nil))
+	protectedHandler(w, getSampleRequestWithApiKey("doesntmatter"))
 
 	actual := w.Result()
-	checkStatusCodeAndCalledCount(t, actual.StatusCode, http.StatusUnauthorized, calledCount, 0)
+	checkStatusCodeAndCalledCount(t, actual.StatusCode, http.StatusInternalServerError, calledCount, 0)
 }
