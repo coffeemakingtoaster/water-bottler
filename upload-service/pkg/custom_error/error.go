@@ -9,3 +9,16 @@ type SystemCommunicationError struct {
 func (re *SystemCommunicationError) Error() string {
 	return fmt.Sprintf("System Error: %s", re.Reason)
 }
+
+type SafeError struct {
+	OutwardMessage string
+	InternalError  error
+}
+
+func (se *SafeError) Error() string {
+	return fmt.Sprintf("Encountered Error %s, will be returned to user as %s", se.InternalError.Error(), se.OutwardMessage)
+}
+
+func NewSafeErrorFromError(err error) *SafeError {
+	return &SafeError{InternalError: err, OutwardMessage: err.Error()}
+}

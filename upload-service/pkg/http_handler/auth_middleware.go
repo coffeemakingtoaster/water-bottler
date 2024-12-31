@@ -49,10 +49,10 @@ func init() {
 func (akc *ApiKeyCache) retrieveValidKey(key string) (string, error) {
 	val, ok := akc.cache[key]
 	if !ok {
-		return "", errors.New("Api Key not present")
+		return "", customerror.NewSafeErrorFromError(errors.New("Api Key not present"))
 	}
 	if time.Time.Sub(time.Now(), val.FetchedAt) > API_KEY_TTL {
-		return "", errors.New("Cached entry expired")
+		return "", customerror.NewSafeErrorFromError(errors.New("Api Key cache entry expired"))
 	}
 	return val.Email, nil
 }
@@ -71,7 +71,7 @@ func validateAPIKeyViaAuthService(key string) (string, error) {
 	req, err := http.NewRequest("POST", requestUrl, strings.NewReader(key))
 	if err != nil {
 		fmt.Printf("Could init request to auth service with url %s %v\n", requestUrl, err)
-		return "", err
+		return "", &customerror.SystemCommunicationError{Reason: "Error creating request"}
 	}
 
 	res, err := httpClient.Do(req)
@@ -91,50 +91,48 @@ func validateAPIKeyViaAuthService(key string) (string, error) {
 	json.NewDecoder(res.Body).Decode(&resp)
 
 	if resp.Status != "valid" {
-		return "", errors.New("API Key is invalid")
+		return "", customerror.NewSafeErrorFromError(errors.New("Invalid API Key"))
 	}
 
 	return resp.Email, nil
 }
 
-func hasValidApiKey(r *http.Request) (bool, string, error) {
+func getEmailForApiKey(r *http.Request) (string, error) {
 	apiKey := r.Header.Get("X-API-KEY")
 
 	if len(apiKey) == 0 {
-		return false, "", nil
+		return "", customerror.NewSafeErrorFromError(errors.New("No API Key provided"))
 	}
 
 	// Do we have a valid entry cached?
 	mail, err := apiKeyCache.retrieveValidKey(apiKey)
 	if err == nil {
-		return true, mail, nil
+		return mail, nil
 	}
 
 	mail, err = validateAPIKeyViaAuthService(apiKey)
 	if err == nil {
 		apiKeyCache.addKeyToCache(apiKey, mail)
-		return true, mail, nil
+		return mail, nil
 	}
 
-	return false, "", err
+	return "", err
 }
 
 func ProtectWithApiKey(handler HandlerFunc) HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		ok, mail, err := hasValidApiKey(r)
+		mail, err := getEmailForApiKey(r)
 
 		if err != nil {
-			switch err.(type) {
+			switch err := err.(type) {
 			case *customerror.SystemCommunicationError:
 				w.WriteHeader(http.StatusInternalServerError)
+			case *customerror.SafeError:
+				w.WriteHeader(http.StatusUnauthorized)
+				w.Write([]byte(err.OutwardMessage))
 			default:
 				w.WriteHeader(http.StatusUnauthorized)
 			}
-			return
-		}
-
-		if !ok {
-			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
 
