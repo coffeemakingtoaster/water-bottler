@@ -88,8 +88,6 @@ func validateAPIKeyViaAuthService(key string) (string, error) {
 
 	json.NewDecoder(res.Body).Decode(&resp)
 
-	//panic(fmt.Sprintf("%v", resp))
-
 	if resp.Status != "valid" {
 		return "", errors.New("API Key is invalid")
 	}

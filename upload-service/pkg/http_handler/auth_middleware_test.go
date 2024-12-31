@@ -16,7 +16,10 @@ func getSampleRequestWithApiKey(key string) *http.Request {
 	return r
 }
 
-func startMockAuthService(wg *sync.WaitGroup, expectedResponse string) *http.Server {
+func startMockAuthService(expectedResponse string) (*sync.WaitGroup, *http.Server) {
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+
 	serveMux := http.NewServeMux()
 	serveMux.HandleFunc("/checkKey",
 		func(w http.ResponseWriter, r *http.Request) {
@@ -33,7 +36,7 @@ func startMockAuthService(wg *sync.WaitGroup, expectedResponse string) *http.Ser
 		}
 	}()
 
-	return &srv
+	return wg, &srv
 }
 
 func stopMockAuthService(wg *sync.WaitGroup, srv *http.Server) {
@@ -41,24 +44,32 @@ func stopMockAuthService(wg *sync.WaitGroup, srv *http.Server) {
 	wg.Wait()
 }
 
+func checkStatusCodeAndCalledCount(t *testing.T, expectedStatusCode, actualStatusCode, expectedCalledCount, actualCalledCount int) {
+	if actualStatusCode != expectedStatusCode {
+		t.Errorf("Expected Response of %d but got %d", expectedStatusCode, actualStatusCode)
+	}
+
+	if actualCalledCount != expectedCalledCount {
+		t.Errorf("Expected protected handler to be called %d times but was called %d times", expectedCalledCount, actualCalledCount)
+	}
+}
+
 func TestCachedApiKey(t *testing.T) {
 	apiKey := "cachedKey123"
-	req := getSampleRequestWithApiKey(apiKey)
 	apiKeyCache.addKeyToCache(apiKey, USERMAIL)
 	w := httptest.NewRecorder()
 
 	actualMail := ""
-	expectedResponseCode := http.StatusOK
 
 	protectedHandler := ProtectWithApiKey(func(w http.ResponseWriter, r *http.Request) {
 		actualMail = r.Header.Get(USER_EMAIL_HEADER)
 	})
-	protectedHandler(w, req)
+	protectedHandler(w, getSampleRequestWithApiKey(apiKey))
 
 	actual := w.Result()
 
-	if actual.StatusCode != expectedResponseCode {
-		t.Errorf("Expected Response of %d but got %d", expectedResponseCode, actual.StatusCode)
+	if actual.StatusCode != http.StatusOK {
+		t.Errorf("Expected Response of %d but got %d", http.StatusOK, actual.StatusCode)
 	}
 
 	if actualMail != USERMAIL {
@@ -67,111 +78,67 @@ func TestCachedApiKey(t *testing.T) {
 }
 
 func TestInvalidApiKey(t *testing.T) {
-	httpServerExitDone := &sync.WaitGroup{}
-
-	httpServerExitDone.Add(1)
-	srv := startMockAuthService(httpServerExitDone, `{"status":"invalid","email":""}`)
-	req := getSampleRequestWithApiKey("invalidKey")
+	httpServerExitDone, srv := startMockAuthService(`{"status":"invalid","email":""}`)
 	w := httptest.NewRecorder()
 
-	expectedResponseCode := http.StatusUnauthorized
 	calledCount := 0
 
 	protectedHandler := ProtectWithApiKey(func(w http.ResponseWriter, r *http.Request) {
 		calledCount++
 	})
-	protectedHandler(w, req)
+	protectedHandler(w, getSampleRequestWithApiKey("invalidKey"))
 
 	actual := w.Result()
 
-	if actual.StatusCode != expectedResponseCode {
-		t.Errorf("Expected Response of %d but got %d", expectedResponseCode, actual.StatusCode)
-	}
-
-	if calledCount > 0 {
-		t.Errorf("Expected protected handler to not be called. However handler was called %d times", calledCount)
-	}
+	checkStatusCodeAndCalledCount(t, actual.StatusCode, http.StatusUnauthorized, calledCount, 0)
 
 	stopMockAuthService(httpServerExitDone, srv)
 }
 
 func TestValidApiKey(t *testing.T) {
-	req := getSampleRequestWithApiKey("valid")
-	httpServerExitDone := &sync.WaitGroup{}
-
-	httpServerExitDone.Add(1)
-	srv := startMockAuthService(httpServerExitDone, `{"status":"valid","email":"valid@solid.com"}`)
+	httpServerExitDone, srv := startMockAuthService(`{"status":"valid","email":"valid@solid.com"}`)
 
 	w := httptest.NewRecorder()
 
-	expectedResponseCode := http.StatusOK
 	calledCount := 0
 
 	protectedHandler := ProtectWithApiKey(func(w http.ResponseWriter, r *http.Request) {
 		calledCount++
 	})
-	protectedHandler(w, req)
+	protectedHandler(w, getSampleRequestWithApiKey("valid"))
 
 	actual := w.Result()
 
-	if actual.StatusCode != expectedResponseCode {
-		t.Errorf("Expected Response of %d but got %d", expectedResponseCode, actual.StatusCode)
-	}
+	checkStatusCodeAndCalledCount(t, actual.StatusCode, http.StatusOK, calledCount, 1)
 
-	if calledCount != 1 {
-		t.Errorf("Expected protected handler have been called once. However handler was called %d times", calledCount)
-	}
 	stopMockAuthService(httpServerExitDone, srv)
 }
 
 func TestNoApiKey(t *testing.T) {
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	w := httptest.NewRecorder()
 
-	expectedResponseCode := http.StatusUnauthorized
 	calledCount := 0
 
 	protectedHandler := ProtectWithApiKey(func(w http.ResponseWriter, r *http.Request) {
 		calledCount++
 	})
-	protectedHandler(w, req)
+	protectedHandler(w, httptest.NewRequest(http.MethodGet, "/", nil))
 
 	actual := w.Result()
 
-	if actual.StatusCode != expectedResponseCode {
-		t.Errorf("Expected Response of %d but got %d", expectedResponseCode, actual.StatusCode)
-	}
-
-	if calledCount > 0 {
-		t.Errorf("Expected protected handler to not be called. However handler was called %d times", calledCount)
-	}
+	checkStatusCodeAndCalledCount(t, actual.StatusCode, http.StatusUnauthorized, calledCount, 0)
 }
 
 func TestUnreachableAuthService(t *testing.T) {
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
-	httpServerExitDone := &sync.WaitGroup{}
-
-	httpServerExitDone.Add(1)
-	srv := startMockAuthService(httpServerExitDone, `{"status":"invalid","email":""}`)
-	defer stopMockAuthService(httpServerExitDone, srv)
-
 	w := httptest.NewRecorder()
 
-	expectedResponseCode := http.StatusUnauthorized
 	calledCount := 0
 
 	protectedHandler := ProtectWithApiKey(func(w http.ResponseWriter, r *http.Request) {
 		calledCount++
 	})
-	protectedHandler(w, req)
+	protectedHandler(w, httptest.NewRequest(http.MethodGet, "/", nil))
 
 	actual := w.Result()
-
-	if actual.StatusCode != expectedResponseCode {
-		t.Errorf("Expected Response of %d but got %d", expectedResponseCode, actual.StatusCode)
-	}
-
-	if calledCount > 0 {
-		t.Errorf("Expected protected handler to not be called. However handler was called %d times", calledCount)
-	}
+	checkStatusCodeAndCalledCount(t, actual.StatusCode, http.StatusUnauthorized, calledCount, 0)
 }
