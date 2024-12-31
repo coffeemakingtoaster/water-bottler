@@ -1,7 +1,9 @@
 # Upload Service
 
 Service for uploading images to the system.
-Runs on port 8080.
+Runs on port 8081.
+
+To specify the domain of the auth service used for api key validation use the `AUTH_SERVICE_URL` env variable.
 
 ## Example request
 
