@@ -33,12 +33,14 @@ const API_KEY_TTL = time.Minute * 2
 
 const USER_EMAIL_HEADER = "X-user-mail"
 
+const AUTH_SERVICE_URL_ENV = "AUTH_SERVICE_URL"
+
 var apiKeyCache = ApiKeyCache{map[string]CachedApiKey{}}
 
 func init() {
-	AuthApiUrl = os.Getenv("AUTH_SERVICE_URL")
+	AuthApiUrl = os.Getenv(AUTH_SERVICE_URL_ENV)
 	if len(AuthApiUrl) == 0 {
-		panic("No value for auth service url passed via env.")
+		AuthApiUrl = "http://localhost:8080"
 	}
 }
 
@@ -62,18 +64,23 @@ func (akc *ApiKeyCache) addKeyToCache(key, mail string) {
 
 func validateAPIKeyViaAuthService(key string) (string, error) {
 
-	fmt.Println(key)
 	requestUrl := fmt.Sprintf("%s/checkKey", AuthApiUrl)
 
 	req, err := http.NewRequest("POST", requestUrl, strings.NewReader(key))
 	if err != nil {
-		fmt.Printf("Could init request to auth service with url %s %v", requestUrl, err)
+		fmt.Printf("Could init request to auth service with url %s %v\n", requestUrl, err)
 		return "", err
 	}
 
 	res, err := httpClient.Do(req)
 
-	if res.StatusCode != http.StatusOK || err != nil {
+	if res == nil || err != nil {
+		fmt.Println("Could not complete request")
+		return "", errors.New("Got unexpected response code")
+
+	}
+
+	if res.StatusCode != http.StatusOK {
 		fmt.Printf("Got invalid response code %d\n", res.StatusCode)
 		return "", errors.New("Got unexpected response code")
 	}
@@ -81,8 +88,10 @@ func validateAPIKeyViaAuthService(key string) (string, error) {
 
 	json.NewDecoder(res.Body).Decode(&resp)
 
+	//panic(fmt.Sprintf("%v", resp))
+
 	if resp.Status != "valid" {
-		return "", nil
+		return "", errors.New("API Key is invalid")
 	}
 
 	return resp.Email, nil
@@ -91,6 +100,10 @@ func validateAPIKeyViaAuthService(key string) (string, error) {
 func hasValidApiKey(r *http.Request) (bool, string) {
 	apiKey := r.Header.Get("X-API-KEY")
 
+	if len(apiKey) == 0 {
+		return false, ""
+	}
+
 	// Do we have a valid entry cached?
 	mail, err := apiKeyCache.retrieveValidKey(apiKey)
 	if err == nil {
@@ -98,13 +111,12 @@ func hasValidApiKey(r *http.Request) (bool, string) {
 	}
 
 	mail, err = validateAPIKeyViaAuthService(apiKey)
-	if err != nil {
-		return false, ""
+	if err == nil {
+		apiKeyCache.addKeyToCache(apiKey, mail)
+		return true, mail
 	}
 
-	apiKeyCache.addKeyToCache(apiKey, mail)
-
-	return true, mail
+	return false, ""
 }
 
 func ProtectWithApiKey(handler HandlerFunc) HandlerFunc {
