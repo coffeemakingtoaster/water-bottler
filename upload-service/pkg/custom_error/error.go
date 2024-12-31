@@ -11,8 +11,10 @@ func (re *SystemCommunicationError) Error() string {
 }
 
 type SafeError struct {
+	// Used for HTTP Responses
 	OutwardMessage string
-	InternalError  error
+	// Can be used for detailed logging
+	InternalError error
 }
 
 func (se *SafeError) Error() string {
