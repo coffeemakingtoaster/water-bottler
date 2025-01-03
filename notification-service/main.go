@@ -9,11 +9,15 @@ import (
 	"net/http"
 	"net/smtp"
 	"os"
+	"strings"
 
 	"github.com/rs/zerolog/log"
 )
 
 var SMTP_SERVER_URL string
+
+var SMTP_SERVER_USERNAME string
+var SMTP_SERVER_PASSWORD string
 
 var MAIL_TEMPLATE *template.Template
 
@@ -44,9 +48,14 @@ func sendMail(w http.ResponseWriter, r *http.Request) {
 
 	MAIL_TEMPLATE.Execute(&message, requestData)
 
-	//auth := smtp.PlainAuth("", from, password, SMTP_SERVER_URL)
-
-	err = smtp.SendMail(SMTP_SERVER_URL, nil, requestData.From, []string{requestData.Email}, message.Bytes())
+	if SMTP_SERVER_PASSWORD != "" && SMTP_SERVER_USERNAME != "" {
+		// For basicauth the smtp server url cannot contain port
+		cleanURL := strings.Split(SMTP_SERVER_URL, ":")
+		auth := smtp.PlainAuth("water-bottler-mail", SMTP_SERVER_USERNAME, SMTP_SERVER_PASSWORD, cleanURL[0])
+		err = smtp.SendMail(SMTP_SERVER_URL, auth, requestData.From, []string{requestData.Email}, message.Bytes())
+	} else {
+		err = smtp.SendMail(SMTP_SERVER_URL, nil, requestData.From, []string{requestData.Email}, message.Bytes())
+	}
 
 	if err != nil {
 		log.Warn().Msgf("Could not send mail due to an error: %s", err.Error())
@@ -64,6 +73,10 @@ func main() {
 	if len(SMTP_SERVER_URL) == 0 {
 		panic("No smtp server specified via the 'SMTP_SERVER_URL' env variable!")
 	}
+
+	// No check if they are actually set because SMTP servers may have no auth required
+	SMTP_SERVER_USERNAME = os.Getenv("SMTP_SERVER_USERNAME")
+	SMTP_SERVER_PASSWORD = os.Getenv("SMTP_SERVER_PASSWORD")
 
 	log.Debug().Msgf("SMTP server configured to be %s", SMTP_SERVER_URL)
 
