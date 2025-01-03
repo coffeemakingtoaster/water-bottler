@@ -21,6 +21,7 @@ This will start the smtp server at port `2525` and expose the web dashboard at [
 <details>
 
 <summary>With basic auth</summary>
+
 ```sh
 docker run -d -e "ServerOptions__Urls=http://*:80" -e "RelayOptions__Login=water" -e "RelayOptions__Password=bottler"  -e "ServerOptions__HostName=water-bottler-mail"  -p 80:80 -p 2525:25 rnwood/smtp4dev
 ```
