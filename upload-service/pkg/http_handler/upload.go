@@ -41,10 +41,11 @@ func HandleUpload(w http.ResponseWriter, r *http.Request) {
 	io.Discard.Write(fileBytes)
 
 	imageId := uuid.New().String()
-	userEmail := w.Header().Get(USER_EMAIL_HEADER)
+	userEmail := r.Header.Get(USER_EMAIL_HEADER)
 
 	// This likely means that the auth middleware was not called beforehand
 	if len(userEmail) == 0 {
+		fmt.Println("Empty user mail")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
