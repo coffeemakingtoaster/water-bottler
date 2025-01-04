@@ -10,6 +10,7 @@ import (
 	"time"
 
 	customerror "github.com/coffeemakingtoaster/water-bottler/upload-service/pkg/custom_error"
+	"github.com/rs/zerolog/log"
 )
 
 type CachedApiKey struct {
@@ -70,25 +71,34 @@ func validateAPIKeyViaAuthService(key string) (string, error) {
 
 	req, err := http.NewRequest("POST", requestUrl, strings.NewReader(key))
 	if err != nil {
-		fmt.Printf("Could init request to auth service with url %s %v\n", requestUrl, err)
-		return "", &customerror.SystemCommunicationError{Reason: "Error creating request"}
+		returnErr := &customerror.SystemCommunicationError{Reason: fmt.Sprintf("Error creating request with error %s", err.Error())}
+		log.Error().Msg(returnErr.Error())
+		return "", returnErr
 	}
 
 	res, err := httpClient.Do(req)
 
 	if res == nil || err != nil {
-		fmt.Println("Could not complete request")
-		return "", &customerror.SystemCommunicationError{Reason: "Could not comlete request"}
+		returnErr := &customerror.SystemCommunicationError{Reason: "Could not comlete request"}
+		log.Error().Msg(returnErr.Error())
+		return "", returnErr
 	}
 
 	if res.StatusCode != http.StatusOK {
-		fmt.Printf("Got invalid response code %d\n", res.StatusCode)
-		return "", &customerror.SystemCommunicationError{Reason: fmt.Sprintf("Got invalid response code %d", res.StatusCode)}
+		returnErr := &customerror.SystemCommunicationError{Reason: fmt.Sprintf("Got invalid response code %d", res.StatusCode)}
+		log.Warn().Msg(returnErr.Error())
+		return "", returnErr
 	}
 
 	var resp KeyCheckResponse
 
-	json.NewDecoder(res.Body).Decode(&resp)
+	err = json.NewDecoder(res.Body).Decode(&resp)
+
+	if err != nil {
+		returnErr := &customerror.SystemCommunicationError{Reason: fmt.Sprintf("Json decode failed with an error %s", err)}
+		log.Error().Msg(returnErr.Error())
+		return "", returnErr
+	}
 
 	if resp.Status != "valid" {
 		return "", customerror.NewSafeErrorFromError(errors.New("Invalid API Key"))

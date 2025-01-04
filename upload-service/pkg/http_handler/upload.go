@@ -1,13 +1,13 @@
 package httphandler
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"time"
 
 	queueconnector "github.com/coffeemakingtoaster/water-bottler/upload-service/pkg/queue_connector"
 	"github.com/google/uuid"
+	"github.com/rs/zerolog/log"
 )
 
 func HandleUpload(w http.ResponseWriter, r *http.Request) {
@@ -21,8 +21,7 @@ func HandleUpload(w http.ResponseWriter, r *http.Request) {
 	// Extract file under key image
 	file, _, err := r.FormFile("image")
 	if err != nil {
-		fmt.Println("Error Retrieving the File")
-		fmt.Println(err)
+		log.Debug().Msgf("Error retrieving file: %s", err.Error())
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -31,7 +30,7 @@ func HandleUpload(w http.ResponseWriter, r *http.Request) {
 	// Get the file data
 	fileBytes, err := io.ReadAll(file)
 	if err != nil {
-		fmt.Println(err)
+		log.Debug().Msgf("Error reading request file data: %s", err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -45,7 +44,7 @@ func HandleUpload(w http.ResponseWriter, r *http.Request) {
 
 	// This likely means that the auth middleware was not called beforehand
 	if len(userEmail) == 0 {
-		fmt.Println("Empty user mail")
+		log.Warn().Msg("Empty user mail header! Something went wrong with the auth middleware")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
