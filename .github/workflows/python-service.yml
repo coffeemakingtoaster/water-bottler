@@ -1,0 +1,20 @@
+name: go based microservice 
+
+on:
+  pull_request:
+    branches:
+      - 'main'
+    paths:
+      - 'object-recognition-service/**'
+  push:
+    branch:
+      - 'main'
+    paths:
+      - 'object-recognition-service/**'
+
+jobs:
+  docker-build:
+    #if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }} # Only run on push to main
+    uses: ./.github/workflows/docker-build-and-push.template.yml
+    with:
+      context: object-recognition-service
