@@ -3,20 +3,20 @@ name: go based microservice
 on:
   pull_request:
     branches:
-      - 'main'
+      - main
     paths:
-      - 'authentication-service/**/*'
-      - 'download-service/**/*'
-      - 'notification-service/**/*'
-      - 'upload-service/**/*'
+      - authentication-service/**/*
+      - download-service/**/*
+      - notification-service/**/*
+      - upload-service/**/*
   push:
     branch:
-      - 'main'
+      - main
     paths:
-      - 'authentication-service/**/*'
-      - 'download-service/**/*'
-      - 'notification-service/**/*'
-      - 'upload-service/**/*'
+      - authentication-service/**/*
+      - download-service/**/*
+      - notification-service/**/*
+      - upload-service/**/*
 
 jobs:
   determine-relevant-dirs:
