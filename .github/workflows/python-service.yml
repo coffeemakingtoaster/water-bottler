@@ -1,4 +1,4 @@
-name: go based microservice 
+name: python based microservice 
 
 on:
   pull_request:
