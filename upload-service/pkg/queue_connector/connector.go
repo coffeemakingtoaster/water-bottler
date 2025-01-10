@@ -16,6 +16,12 @@ var queueChan *amqp.Channel
 var QueueUrl string
 var QUEUE_URL_ENV = "QUEUE_URL"
 
+type Job struct {
+	ImageId     string    `json:"image_id"`
+	UserEmail   string    `json:"user_mail"`
+	RequestTime time.Time `json:"request_time"`
+}
+
 func init() {
 	QueueUrl = os.Getenv(QUEUE_URL_ENV)
 	if len(QueueUrl) == 0 {
@@ -66,12 +72,6 @@ func getChannel() (*amqp.Channel, *amqp.Queue) {
 	queue = &new_queue
 
 	return queueChan, queue
-}
-
-type Job struct {
-	ImageId     string
-	UserEmail   string
-	RequestTime time.Time
 }
 
 func AddJobToQueue(job Job) bool {
