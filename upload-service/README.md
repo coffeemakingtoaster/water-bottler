@@ -8,7 +8,7 @@ To specify the domain of the rabbitmq instance use the `QUEUE_URL` env variable.
 
 <details>
 
-    <summary> Start a rabbitmq instance locally </summary>
+<summary> Start a rabbitmq instance locally </summary>
 
 To start a rabbitmq instance locally:
 ```sh
