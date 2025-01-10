@@ -15,6 +15,7 @@ var queue *amqp.Queue
 var queueChan *amqp.Channel
 var QueueUrl string
 var QUEUE_URL_ENV = "QUEUE_URL"
+var QUEUE_CHANNEL_NAME = "image-workload"
 
 type Job struct {
 	ImageId     string    `json:"image_id"`
@@ -57,7 +58,7 @@ func getChannel() (*amqp.Channel, *amqp.Queue) {
 	}
 
 	new_queue, err := queueChan.QueueDeclare(
-		"image-workload",
+		QUEUE_CHANNEL_NAME,
 		false,
 		false,
 		false,
