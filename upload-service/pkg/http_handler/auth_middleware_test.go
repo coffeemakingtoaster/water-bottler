@@ -2,6 +2,7 @@ package httphandler
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"sync"
@@ -9,6 +10,8 @@ import (
 )
 
 const USERMAIL = "user@mail.com"
+const SUCCESS_RESPONSE = `{"status":"valid","email":"valid@solid.com"}`
+const INVALID_REPONSE = `{"status":"invalid","email":""}`
 
 func getSampleRequestWithApiKey(key string) *http.Request {
 	r := httptest.NewRequest(http.MethodGet, "/", nil)
@@ -16,18 +19,24 @@ func getSampleRequestWithApiKey(key string) *http.Request {
 	return r
 }
 
-func startMockAuthService(expectedResponse string) (*sync.WaitGroup, *http.Server) {
+func startMockAuthService(validKey string, port int) (*sync.WaitGroup, *http.Server) {
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 
 	serveMux := http.NewServeMux()
 	serveMux.HandleFunc("/checkKey",
 		func(w http.ResponseWriter, r *http.Request) {
-			w.Write([]byte(expectedResponse))
-
+			body, _ := io.ReadAll(r.Body)
+			fmt.Printf("Want: %s Got: %s\n", validKey, string(body))
+			if validKey == string(body) {
+				fmt.Print(SUCCESS_RESPONSE)
+				w.Write([]byte(SUCCESS_RESPONSE))
+				return
+			}
+			w.Write([]byte(INVALID_REPONSE))
 		})
-	srv := http.Server{Addr: ":8080", Handler: serveMux}
-	AuthApiUrl = "http://localhost:8080"
+	srv := http.Server{Addr: fmt.Sprintf(":%d", port), Handler: serveMux}
+	AuthApiUrl = fmt.Sprintf("http://localhost:%d", port)
 	go func() {
 		defer wg.Done()
 
@@ -77,8 +86,9 @@ func TestCachedApiKey(t *testing.T) {
 	}
 }
 
-func TestInvalidApiKey(t *testing.T) {
-	httpServerExitDone, srv := startMockAuthService(`{"status":"invalid","email":""}`)
+func TestApiKey(t *testing.T) {
+	validKey := "valid"
+	httpServerExitDone, srv := startMockAuthService(validKey, 8080)
 	w := httptest.NewRecorder()
 
 	calledCount := 0
@@ -92,22 +102,12 @@ func TestInvalidApiKey(t *testing.T) {
 
 	checkStatusCodeAndCalledCount(t, actual.StatusCode, http.StatusUnauthorized, calledCount, 0)
 
-	stopMockAuthService(httpServerExitDone, srv)
-}
+	w = httptest.NewRecorder()
+	calledCount = 0
 
-func TestValidApiKey(t *testing.T) {
-	httpServerExitDone, srv := startMockAuthService(`{"status":"valid","email":"valid@solid.com"}`)
+	protectedHandler(w, getSampleRequestWithApiKey(validKey))
 
-	w := httptest.NewRecorder()
-
-	calledCount := 0
-
-	protectedHandler := ProtectWithApiKey(func(w http.ResponseWriter, r *http.Request) {
-		calledCount++
-	})
-	protectedHandler(w, getSampleRequestWithApiKey("valid"))
-
-	actual := w.Result()
+	actual = w.Result()
 
 	checkStatusCodeAndCalledCount(t, actual.StatusCode, http.StatusOK, calledCount, 1)
 

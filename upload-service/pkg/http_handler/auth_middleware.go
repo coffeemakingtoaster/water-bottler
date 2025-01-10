@@ -79,7 +79,7 @@ func validateAPIKeyViaAuthService(key string) (string, error) {
 	res, err := httpClient.Do(req)
 
 	if res == nil || err != nil {
-		returnErr := &customerror.SystemCommunicationError{Reason: "Could not comlete request"}
+		returnErr := &customerror.SystemCommunicationError{Reason: fmt.Sprintf("Could not comlete request due to an error: %s", err.Error())}
 		log.Error().Msg(returnErr.Error())
 		return "", returnErr
 	}
