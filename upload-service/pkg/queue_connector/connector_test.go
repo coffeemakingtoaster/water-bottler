@@ -8,7 +8,6 @@ import (
 
 	queueconnector "github.com/coffeemakingtoaster/water-bottler/upload-service/pkg/queue_connector"
 	amqp "github.com/rabbitmq/amqp091-go"
-	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/rabbitmq"
 )
 
@@ -78,7 +77,7 @@ func Test_publishJob(t *testing.T) {
 	testJobInstance.RequestTime = time.Now()
 
 	defer func() {
-		if err := testcontainers.TerminateContainer(rabbitContainer); err != nil {
+		if err := rabbitContainer.Terminate(context.TODO()); err != nil {
 			t.Errorf("failed to terminate container: %s", err)
 		}
 	}()
