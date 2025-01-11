@@ -3,6 +3,7 @@ package httphandler
 import (
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"sync"
@@ -17,6 +18,18 @@ func getSampleRequestWithApiKey(key string) *http.Request {
 	r := httptest.NewRequest(http.MethodGet, "/", nil)
 	r.Header.Add("X-API-KEY", key)
 	return r
+}
+
+func getAvailablePort(startPort int) int {
+	ln, err := net.Listen("tcp", fmt.Sprintf(":%d", startPort))
+
+	defer ln.Close()
+
+	if err != nil {
+		return getAvailablePort(startPort + 1)
+	}
+
+	return startPort
 }
 
 func startMockAuthService(validKey string, port int) (*sync.WaitGroup, *http.Server) {
@@ -88,7 +101,7 @@ func TestCachedApiKey(t *testing.T) {
 
 func TestApiKey(t *testing.T) {
 	validKey := "valid"
-	httpServerExitDone, srv := startMockAuthService(validKey, 8080)
+	httpServerExitDone, srv := startMockAuthService(validKey, getAvailablePort(8080))
 	w := httptest.NewRecorder()
 
 	calledCount := 0
