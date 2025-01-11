@@ -16,7 +16,12 @@ spec:
       - name: upload-service
         image: github.com/coffeemakingtoaster/water-bottler/upload-service:local
         ports:
-        - containerPort: 8080
+        - containerPort: 8081
+        env:
+        - name: AUTH_SERVICE_URL
+          value: "authentication-service.default.svc.cluster.local:8080"
+        - name: QUEUE_URL
+          value: "amqp://water:bottler@dev-cluster.default.svc.cluster.local:5672"
 
 ---
 
@@ -30,6 +35,7 @@ spec:
   type: NodePort
   ports:
   - port: 8080
+    targetPort: 8081
     protocol: TCP
   selector:
     run: upload-service

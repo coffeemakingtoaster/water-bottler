@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -43,6 +43,9 @@ if [ "$CURRENT_CONTEXT" != "minikube" ]; then
 fi
 
 minikube addons enable ingress
+
+# install rabbitmq cluster operator
+kubectl apply -f "https://github.com/rabbitmq/cluster-operator/releases/latest/download/cluster-operator.yml"
 
 for dir in "${SERVICE_DIRECORIES[@]}"; do
 	echo "Starting build for ${PURPLE}${dir}${NC}"

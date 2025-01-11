@@ -1,3 +1,19 @@
+apiVersion: v1
+data:
+  db.yaml: |-
+    apiKeys:
+      - name: "jeff@water-bottler.local"
+        key: "amVmZnMtd2F0ZXItYm90dGxlci1leGFtcGxlLWFwaS1rZXk="
+        validUntil: "2036-12-31T23:59:59Z"
+      - name: "emañuel@water-bottler.local"
+        key: "ZW1hw7F1ZWwtd2F0ZXItYm90dGxlci1leGFtcGxlLWFwaS1rZXk="
+        validUntil: "1982-01-01T00:00:00Z"
+kind: ConfigMap
+metadata:
+  name: auth-database
+
+---
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -17,6 +33,14 @@ spec:
         image: github.com/coffeemakingtoaster/water-bottler/authentication-service:local
         ports:
         - containerPort: 8080
+        volumeMounts:
+        - name: db-config
+          mountPath: /app/db.yaml
+          subPath: db.yaml                      # Key in the ConfigMap
+      volumes:
+      - name: db-config 
+        configMap:
+          name: auth-database
 
 ---
 
@@ -33,3 +57,5 @@ spec:
     protocol: TCP
   selector:
     run: authentication-service
+
+

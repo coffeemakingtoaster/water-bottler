@@ -1,0 +1,10 @@
+apiVersion: rabbitmq.com/v1beta1
+kind: RabbitmqCluster
+metadata:
+  name: dev-cluster
+  namespace: default
+spec:
+  rabbitmq:
+    additionalConfig: |
+      default_user=water
+      default_pass=bottler
