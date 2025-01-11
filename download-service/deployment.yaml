@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: download-service 
+spec:
+  selector:
+    matchLabels:
+      run: download-service
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: download-service
+    spec:
+      containers:
+      - name: download-service
+        image: github.com/coffeemakingtoaster/water-bottler/download-service:local
+        ports:
+        - containerPort: 8080
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: download-service
+  labels:
+    run: download-service 
+spec:
+  type: NodePort
+  ports:
+  - port: 8080
+    protocol: TCP
+  selector:
+    run: download-service
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: microservice-expose
+spec:
+  ingressClassName: nginx 
+  rules:
+    - host: water-bottler.local
+      http:
+        paths:
+          - path: /download-service
+            pathType: Prefix
+            backend:
+              service:
+                name: download-service
+                port:
+                  number: 8080

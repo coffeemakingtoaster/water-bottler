@@ -32,6 +32,7 @@ RUN adduser \
 
 # Copy build with permissions
 COPY --from=build --chown=$USER:$USER /build/notification-service /app/notification-service
+COPY ./mail.tmpl ./mail.tmpl
 
 # Ensure that binary can be run
 RUN chmod +x /app/notification-service
