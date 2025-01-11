@@ -19,7 +19,7 @@ spec:
         - containerPort: 8081
         env:
         - name: AUTH_SERVICE_URL
-          value: "authentication-service.default.svc.cluster.local:8080"
+          value: "http://authentication-service.default.svc.cluster.local:8080"
         - name: QUEUE_URL
           value: "amqp://water:bottler@dev-cluster.default.svc.cluster.local:5672"
 
@@ -37,25 +37,6 @@ spec:
   - port: 8080
     targetPort: 8081
     protocol: TCP
+    nodePort: 30081 
   selector:
     run: upload-service
-
----
-
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: microservice-expose
-spec:
-  ingressClassName: nginx 
-  rules:
-    - host: water-bottler.local
-      http:
-        paths:
-          - path: /upload-service
-            pathType: Prefix
-            backend:
-              service:
-                name: upload-service
-                port:
-                  number: 8080

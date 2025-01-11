@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: smtp4dev
+  labels:
+    app: smtp4dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: smtp4dev
+  template:
+    metadata:
+      labels:
+        app: smtp4dev
+    spec:
+      containers:
+      - name: smtp4dev
+        image: rnwood/smtp4dev:latest
+        ports:
+        - containerPort: 80  # webinterface 
+        - containerPort: 25  # SMTP port
+        env:
+        - name: ServerOptions__Urls
+          value: "http://*:80"
+            #- name: RelayOptions__Login
+              #value: "water"
+            #- name: RelayOptions__Password
+              #value: "bottler"
+        - name: ServerOptions__HostName
+          value: "water-bottler-mail"
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: smtp4dev
+  labels:
+    app: smtp4dev
+spec:
+  selector:
+    app: smtp4dev
+  ports:
+  - name: http
+    protocol: TCP
+    port: 80
+    targetPort: 80
+    nodePort: 30080
+  - name: smtp
+    protocol: TCP
+    port: 2525
+    targetPort: 25
+  type: NodePort

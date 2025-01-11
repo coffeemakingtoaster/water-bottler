@@ -42,10 +42,10 @@ if [ "$CURRENT_CONTEXT" != "minikube" ]; then
     exit 1
 fi
 
-minikube addons enable ingress
-
 # install rabbitmq cluster operator
 kubectl apply -f "https://github.com/rabbitmq/cluster-operator/releases/latest/download/cluster-operator.yml"
+
+kubectl apply -f ./development-deployments/
 
 for dir in "${SERVICE_DIRECORIES[@]}"; do
 	echo "Starting build for ${PURPLE}${dir}${NC}"
@@ -57,6 +57,14 @@ for dir in "${SERVICE_DIRECORIES[@]}"; do
 	fi
 done
 
+kubectl wait --for=condition=Ready pod/dev-cluster-server-0 --timeout=300s
+kubectl wait --for=condition=Available deployment/smtp4dev --timeout=300s
+
+echo ""
+echo ""
 echo "Done deploying"
 echo "The api endpoint is accessible here:"
-minikube service authentication-service --url
+minikube service upload-service --url
+echo "The smtp dashboard is accessible here:"
+minikube service smtp4dev --url
+

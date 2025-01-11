@@ -17,6 +17,15 @@ spec:
         image: github.com/coffeemakingtoaster/water-bottler/notification-service:local
         ports:
         - containerPort: 8080
+        env:
+        - name: SMTP_SERVER_URL
+          value: smtp4dev.default.svc.cluster.local:2525
+
+            # Commented out because plainauth does not work here
+            #- name: SMTP_SERVER_USERNAME
+              #value: water
+            #- name: SMTP_SERVER_PASSWORD
+              #value: bottler
 
 ---
 
