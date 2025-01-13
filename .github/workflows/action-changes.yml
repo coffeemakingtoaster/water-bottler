@@ -41,7 +41,6 @@ jobs:
       context: ${{ matrix.dir }}
 
   validate-k8s-definitions:
-    if: ${{ needs.determine-relevant-dirs.outputs.changed_directories != '' }}  
     strategy:
       matrix: 
         dir:
