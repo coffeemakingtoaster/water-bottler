@@ -10,6 +10,7 @@ on:
       - notification-service/**/*.yaml
       - upload-service/**/*.yaml
       - development-deployments/**/*.yaml
+
   push:
     branch:
       - main

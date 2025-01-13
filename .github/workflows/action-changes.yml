@@ -39,3 +39,30 @@ jobs:
     uses: ./.github/workflows/docker-build-and-push.template.yml
     with:
       context: ${{ matrix.dir }}
+
+  validate-k8s-definitions:
+    if: ${{ needs.determine-relevant-dirs.outputs.changed_directories != '' }}  
+    strategy:
+      matrix: 
+        dir:
+          - authentication-service
+          - download-service
+          - notification-service
+          - upload-service
+          - development-deployments
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{ matrix.dir }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v4
+        with:
+          go-version: '1.23.3' 
+
+      - name: install validator
+        run: go install github.com/yannh/kubeconform/cmd/kubeconform@latest 
+
+      - name: validation
+        run: kubeconform --summary ./*.yaml
