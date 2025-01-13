@@ -266,5 +266,8 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
+# .pt Files (AI Models)
+*.pt
+
 # End of https://www.toptal.com/developers/gitignore/api/python,visualstudiocode,macos,windows,linux
 
