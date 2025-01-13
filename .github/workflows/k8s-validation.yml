@@ -52,6 +52,7 @@ jobs:
 
   validate-k8s-definitions:
     if: ${{ needs.determine-relevant-dirs.outputs.changed_directories != '' }}  
+    runs-on: ubuntu-latest
     strategy:
       matrix: ${{fromJson(needs.determine-relevant-dirs.outputs.changed_directories)}}
     needs:

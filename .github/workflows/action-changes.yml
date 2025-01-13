@@ -54,6 +54,7 @@ jobs:
       run:
         shell: bash
         working-directory: ${{ matrix.dir }}
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
