@@ -291,3 +291,6 @@ tags
 .ionide
 
 # End of https://www.toptal.com/developers/gitignore/api/python,go,vim,visualstudiocode,macos,linux,opencv
+
+### IntelliJ ###
+.idea/
