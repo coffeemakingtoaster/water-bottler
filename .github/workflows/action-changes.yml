@@ -7,7 +7,7 @@ on:
     paths:
       - '.github/**/*'
   push:
-    branch:
+    branches:
       - 'main'
     paths:
       - '.github/**/*'
