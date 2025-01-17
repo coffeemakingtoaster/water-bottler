@@ -4,8 +4,9 @@ import os
 from config import CONFIG
 from image_utils import overlay_water_bottle
 from image_utils import process_image_paths
+from image_utils import load_water_bottle
 
-def setup_model():
+def setup_model() -> YOLOWorld:
     model = YOLOWorld()
     classes = ["beer bottle", "beer can", "beer glass", "beer mug", "beer stein"]
     modifiers = ["partial visible", "blurry", "empty"]
@@ -17,32 +18,33 @@ def setup_model():
     model.set_classes(all_classes)
     return model
 
-def process_images(image_paths):
-    try:
-        os.makedirs(CONFIG['OUTPUT_DIR'], exist_ok=True)
-        model = setup_model()
+def process_images(image_paths: list):
+    water_bottle = load_water_bottle(CONFIG.WATER_BOTTLE_PATH)
+    os.makedirs(CONFIG.OUTPUT_DIR, exist_ok=True)
+    model = setup_model()
 
-        results = model.predict(
-            image_paths,
-            iou=CONFIG['IOU_THRESHOLD'],
-            conf=CONFIG['CONFIDENCE_THRESHOLD'],
-            agnostic_nms=True,
-            save=False,
-            project=CONFIG['OUTPUT_DIR'],
-            name="results",
-            exist_ok=True,
-        )
+    results = model.predict(
+        image_paths,
+        iou=CONFIG.IOU_THRESHOLD,
+        conf=CONFIG.CONFIDENCE_THRESHOLD,
+        agnostic_nms=True,
+        save=False,
+        project=CONFIG.OUTPUT_DIR,
+        name="results",
+        exist_ok=True,
+    )
 
-        for i, result in enumerate(results):
-            if len(result.boxes) > 0:
+    for i, result in enumerate(results):
+        if len(result.boxes) > 0:
+            try:
                 img = result.path
                 boxes = result.boxes.xyxy.cpu().numpy()
 
                 for box in boxes:
-                    img = overlay_water_bottle(img, box)
+                    img = overlay_water_bottle(img, water_bottle, box)
 
                 output_path = os.path.join(
-                    CONFIG['OUTPUT_DIR'],
+                    CONFIG.OUTPUT_DIR,
                     f"image{i}_modified.jpg"
                 )
                 final_image = Image.fromarray(img)
@@ -51,9 +53,9 @@ def process_images(image_paths):
                 final_image.save(output_path)
                 print(f"Saved processed image to {output_path}")
 
-    except Exception as e:
-        print(f"Error in image processing pipeline: {str(e)}")
-        raise
+            except Exception as e:
+                print(f"Error in image processing for: image{str(i)}")
+                raise
 
 if __name__ == "__main__":
     print("Starting Object Recognition Service")
