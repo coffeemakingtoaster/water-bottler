@@ -1,6 +1,5 @@
 from ultralytics import YOLOWorld
 from PIL import Image
-import numpy as np
 import os
 from config import CONFIG
 from image_utils import overlay_water_bottle
