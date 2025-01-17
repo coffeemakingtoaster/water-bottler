@@ -10,7 +10,7 @@ on:
       - notification-service/**/*
       - upload-service/**/*
   push:
-    branch:
+    branches:
       - main
     paths:
       - authentication-service/**/*
