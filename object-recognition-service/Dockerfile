@@ -1,5 +1,4 @@
-FROM python:3.12.8-alpine3.21
-
+FROM python:3.11-slim
 # Install opencv dependencies via apk if needed
 
 WORKDIR /app
