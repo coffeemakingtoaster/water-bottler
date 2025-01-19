@@ -5,7 +5,11 @@ WORKDIR /app
 
 COPY ./requirements.txt ./requirements.txt
 
-RUN pip install -r ./requirements.txt
+# Force cpu install of torch toolkit before installing ultralytics
+# The ultralytics install will then omit gpu dependencies -> reduce image size by around 7 GB
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu && \
+    pip install --no-cache-dir -r ./requirements.txt
 
 COPY . .
 
