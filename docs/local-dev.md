@@ -29,7 +29,7 @@ To enable local development, that already takes the k8s deployment into consider
 
 ### Requirements
 
-Therefore the following must be installed:
+Therefor the following must be installed:
 
 - [Minikube](https://github.com/kubernetes/minikube)
 - [kubectl](https://kubernetes.io/docs/tasks/tools/)
