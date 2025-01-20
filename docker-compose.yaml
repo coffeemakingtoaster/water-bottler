@@ -28,6 +28,11 @@ services:
     ports: 
       - 8083:8080
 
+  object-recognition-service:
+    build: ./object-recognition-service/
+    ports:
+      - 8084:8080
+
   rabbitmq:
     image: rabbitmq:3-management-alpine
     ports:
