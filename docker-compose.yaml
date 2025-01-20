@@ -1,0 +1,68 @@
+services:
+  authentication-service:
+    build: ./authentication-service/
+    ports: 
+      - 8080:8080
+    volumes:
+      - ./authentication-service/db.yaml.examble:/app/db.yaml
+
+  upload-service:
+    build: ./upload-service/
+    ports: 
+      - 8081:8081
+    environment:
+      AUTH_SERVICE_URL: http://authentication-service:8080
+      QUEUE_URL: amqp://water:bottler@rabbitmq:5672
+
+  notification-service:
+    build: ./notification-service/
+    ports: 
+      - 8082:8080
+    environment:
+      SMTP_SERVER_URL: smtp4dev:2525
+      SMTP_SERVER_USERNAME: water
+      SMTP_SERVER_PASSWORD: bottler
+
+  download-service:
+    build: ./download-service/
+    ports: 
+      - 8083:8080
+
+  object-recognition-service:
+    build: ./object-recognition-service/
+    ports:
+      - 8084:8080
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    ports:
+      - "3111:15672" # Management UI
+      - "5672:5672"  # AMQP
+    environment:
+      RABBITMQ_DEFAULT_USER: water
+      RABBITMQ_DEFAULT_PASS: bottler
+
+  smtp4dev:
+    image: rnwood/smtp4dev
+    ports:
+      - "80:80"      # Web interface
+      - "2525:25"    # SMTP port
+    environment:
+      ServerOptions__Urls: "http://*:80"
+      RelayOptions__Login: water
+      RelayOptions__Password: bottler
+      ServerOptions__HostName: water-bottler-mail
+
+  # Minio because it exposes an s3 api similar to rook object storage
+  minio:
+    image: quay.io/minio/minio
+    container_name: minio
+    ports:
+      - "9000:9000" # Main API port
+      - "9001:9001" # Console port
+    environment:
+      MINIO_ROOT_USER: water 
+      MINIO_ROOT_PASSWORD: bottler123
+    volumes:
+      - ~/minio/data:/data
+    command: server /data --console-address ":9001"
