@@ -52,3 +52,17 @@ services:
       RelayOptions__Login: water
       RelayOptions__Password: bottler
       ServerOptions__HostName: water-bottler-mail
+
+  # Minio because it exposes an s3 api similar to rook object storage
+  minio:
+    image: quay.io/minio/minio
+    container_name: minio
+    ports:
+      - "9000:9000" # Main API port
+      - "9001:9001" # Console port
+    environment:
+      MINIO_ROOT_USER: water 
+      MINIO_ROOT_PASSWORD: bottler123
+    volumes:
+      - ~/minio/data:/data
+    command: server /data --console-address ":9001"
