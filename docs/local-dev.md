@@ -58,5 +58,10 @@ This publishes the version of your local services to the cluster. In some cases 
 Run the application by passing the `deploy` keyword to the build-all-local.sh script.
 
 ```sh
-sh ./build-all-local.sh
+sh ./build-all-local.sh deploy
 ```
+
+The script finished with 3 endpoints:
+- The very top one is the api endpoint. Test it with `curl -X POST -F image=@test-image.jpg -H "X-API-KEY: amVmZnMtd2F0ZXItYm90dGxlci1leGFtcGxlLWFwaS1rZXk=" localhost:49691/upload -s -o /dev/null -w "%{http_code}"`(not that the testimage must be present)
+- The second is redundant to the first
+- The third one is the web interface of the smtp dev server
