@@ -40,7 +40,7 @@ Therefor the following must be installed:
 Start your local cluster using minikube:
 
 ```sh
-minikube start --extra-config kubelet.EnableCustomMetrics=true
+minikube start 
 ```
 
     Optionally you can specify the resource amount the cluster should use. Use `minikube start --help` for more information.

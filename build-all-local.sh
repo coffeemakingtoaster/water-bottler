@@ -56,9 +56,8 @@ helm install prometheus-adapter prometheus-community/prometheus-adapter --values
 # start deployments
 kubectl apply -f ./development-deployments/
 
-#kubectl rollout restart deployment prometheus-adapter
-
 for dir in "${SERVICE_DIRECORIES[@]}"; do
+	echo ""
 	echo "Starting build for ${PURPLE}${dir}${NC}"
 	if [ ! -f $dir/deployment.yaml ]; then
     		echo "${YELLOW}No Deployment for ${dir}! Skipping service...${NC}"

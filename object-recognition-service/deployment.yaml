@@ -36,7 +36,10 @@ spec:
       describedObject:
         apiVersion: v1
         kind: Service
+        # point to rabbitmq service
         name: dev-cluster
       target:
         type: Value
+        # For every one message in the queue one instance of the object recognition service is started
+        # This value is super low for testing purposes
         value: 1

@@ -87,6 +87,7 @@ data:
 
 ---
 
+# Setup metric publishing to k8s control plane
 apiVersion: apiregistration.k8s.io/v1
 kind: APIService
 metadata:
