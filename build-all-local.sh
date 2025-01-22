@@ -42,10 +42,21 @@ if [ "$CURRENT_CONTEXT" != "minikube" ]; then
     exit 1
 fi
 
+# Helm prepare
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+
 # install rabbitmq cluster operator
 kubectl apply -f "https://github.com/rabbitmq/cluster-operator/releases/latest/download/cluster-operator.yml"
 
+# setup prometheus
+helm install prometheus-stack prometheus-community/kube-prometheus-stack
+helm install prometheus-adapter prometheus-community/prometheus-adapter --values ./overrides/prometheus-adapter.yaml
+
+# start deployments
 kubectl apply -f ./development-deployments/
+
+#kubectl rollout restart deployment prometheus-adapter
 
 for dir in "${SERVICE_DIRECORIES[@]}"; do
 	echo "Starting build for ${PURPLE}${dir}${NC}"
@@ -57,14 +68,24 @@ for dir in "${SERVICE_DIRECORIES[@]}"; do
 	fi
 done
 
-kubectl wait --for=condition=Ready pod/dev-cluster-server-0 --timeout=300s
 kubectl wait --for=condition=Available deployment/smtp4dev --timeout=300s
+
+CMD="kubectl get --raw /apis/custom.metrics.k8s.io/v1beta1 | jq '.resources.[].name' | grep services/rabbitmq_queue_messages_ready"
+
+while true; do
+  RESULT=$(eval "$CMD")
+  if [[ -n "$RESULT" ]]; then
+    echo "Autoscaler should now be ready!"
+    break
+  fi
+  echo "Waiting custom metric to be available (this can take a few minutes)"
+  sleep  10
+done
 
 echo ""
 echo ""
 echo "Done deploying"
 echo "The api endpoint is accessible here:"
-minikube service upload-service --url
+minikube service upload-service --url&
 echo "The smtp dashboard is accessible here:"
 minikube service smtp4dev --url
-
