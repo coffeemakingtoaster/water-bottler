@@ -1,11 +1,10 @@
 FROM python:3.11-slim
-# Install opencv dependencies via apk if needed
 
 WORKDIR /app
 
 COPY ./requirements.txt ./requirements.txt
 
-RUN apt-get update && apt-get install ffmpeg libsm6 libxext6 git -y
+RUN apt-get update && apt-get install ffmpeg libsm6 libxext6 git wget -y
 
 # Force cpu install of torch toolkit before installing ultralytics
 # The ultralytics install will then omit gpu dependencies -> reduce image size by around 7 GB
@@ -16,10 +15,10 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # Install clip using git and then remove it -> we dont need it during runtime
 RUN pip install --no-cache-dir "git+https://github.com/ultralytics/CLIP.git" && apt-get remove git -y
 
+# Download the base model to reduce startup time
+RUN wget https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8s-world.pt
+
 COPY . .
 
-# Load model into dockerfile to reduce startup time
-RUN python -u ./setup-model.py 
-
 # -u so it prints directly
-CMD ["python","-u","main.py"]
+CMD ["python","-u","app/main.py"]
