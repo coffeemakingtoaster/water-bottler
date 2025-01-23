@@ -1,0 +1,12 @@
+dependencies:
+- name: kube-prometheus-stack
+  repository: https://prometheus-community.github.io/helm-charts
+  version: 68.3.0
+- name: prometheus-adapter
+  repository: https://prometheus-community.github.io/helm-charts
+  version: 4.11.0
+- name: rabbitmq-cluster-operator
+  repository: https://charts.bitnami.com/bitnami
+  version: 4.4.2
+digest: sha256:80107648aba33569a123208e482da3d9acc2b4897ceeefa1ba5ba32110311974
+generated: "2025-01-23T16:34:12.473001+01:00"

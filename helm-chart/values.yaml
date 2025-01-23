@@ -1,0 +1,64 @@
+globalImageTag: local
+
+enableSMTPDev: true
+
+apiKeys:
+  - name: "jeff@water-bottler.local"
+    key: "amVmZnMtd2F0ZXItYm90dGxlci1leGFtcGxlLWFwaS1rZXk="
+    validUntil: "2036-12-31T23:59:59Z"
+  - name: "emañuel@water-bottler.local"
+    key: "ZW1hw7F1ZWwtd2F0ZXItYm90dGxlci1leGFtcGxlLWFwaS1rZXk="
+    validUntil: "1982-01-01T00:00:00Z"
+
+minio:
+  accessKey: water
+  accessKeySecret: bottler123
+  bucketName: water-buckid
+
+rabbitmq:
+  password: bottler
+  username: water
+
+uploadService:
+  configuration:
+    authServiceURL: http://authentication-service.{{ .Release.Namespace }}.svc.cluster.local:8080
+    queueURL: amqp://water:bottler@dev-cluster.{{ .Release.Namespace }}.svc.cluster.local:5672
+    minioEndpoint: minio-service.{{ .Release.Namespace }}.svc.cluster.local:9000
+
+notificationService:
+  configuration:
+    smtpServerURL: 
+    smtpAuthUsername:
+    smtpAuthPassword:
+
+downloadService:
+  configuration:
+    minioEndpoint: minio-service.{{ .Release.Namespace }}.svc.cluster.local:9000
+
+# override for adapter
+prometheus-adapter:
+  prometheus:
+    url: http://prometheus-stack-kube-prom-prometheus.default.svc.cluster.local
+    port: 9090
+    path: ""
+
+  replicas: 1
+
+  rules:
+    default: true
+
+    custom: 
+    - seriesQuery: 'rabbitmq_queue_messages_ready{container="rabbitmq"}'
+      resources:
+        overrides:
+          namespace: {resource: "namespace"}
+          pod: {resource: "pod"}
+      name:
+        matches: "^(.*)_ready$"
+        as: "${1}"
+      metricsQuery: 'avg_over_time(<<.Series>>[5m])'
+
+    existing:
+
+    external: []
+

@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: download-service 
+spec:
+  selector:
+    matchLabels:
+      run: download-service
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: download-service
+    spec:
+      containers:
+      - name: download-service
+        image: github.com/coffeemakingtoaster/water-bottler/download-service:{{ .Values.globalImageTag }}
+        ports:
+        - containerPort: 8080
+        env:
+        - name: MINIO_ACCESS_KEY
+          value: {{ .Values.minio.accessKey }}
+        - name: MINIO_SECRET_KEY
+          value: {{ .Values.minio.accessKeySecret }}
+        - name: MINIO_ENDPOINT
+          value: {{ tpl $.Values.downloadService.configuration.minioEndpoint $ }}
+        - name: MINIO_BUCKET_NAME
+          value: {{ .Values.minio.bucketName }}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: download-service
+  labels:
+    run: download-service 
+spec:
+  type: NodePort
+  ports:
+  - port: 8080
+    protocol: TCP
+  selector:
+    run: download-service

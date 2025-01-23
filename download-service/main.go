@@ -53,10 +53,10 @@ func downloadFile(w http.ResponseWriter, r *http.Request, minioClient *minio.Cli
 }
 
 func main() {
-	accessKeyID := os.Getenv("ACCESS_KEY")
-	secretAccessKey := os.Getenv("SECRET_KEY")
-	endpoint := os.Getenv("ENDPOINT")
-	bucketName := os.Getenv("BUCKET_NAME")
+	accessKeyID := os.Getenv("MINIO_ACCESS_KEY")
+	secretAccessKey := os.Getenv("MINIO_SECRET_KEY")
+	endpoint := os.Getenv("MINIO_ENDPOINT")
+	bucketName := os.Getenv("MINIO_BUCKET_NAME")
 
 	objectStoreConnAvailable := false
 

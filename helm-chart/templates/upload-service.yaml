@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: upload-service 
+spec:
+  selector:
+    matchLabels:
+      run: upload-service
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: upload-service
+    spec:
+      containers:
+      - name: upload-service
+        image: github.com/coffeemakingtoaster/water-bottler/upload-service:{{ .Values.globalImageTag }}
+        ports:
+        - containerPort: 8081
+        env:
+        - name: AUTH_SERVICE_URL
+          value: {{ tpl $.Values.uploadService.configuration.authServiceURL $ }}
+        - name: QUEUE_URL
+          value: {{ tpl $.Values.uploadService.configuration.queueURL $ }}
+        - name: MINIO_ACCESS_KEY
+          value: {{ .Values.minio.accessKey }}
+        - name: MINIO_SECRET_KEY
+          value: {{ .Values.minio.accessKeySecret }}
+        - name: MINIO_ENDPOINT
+          value: {{ tpl $.Values.uploadService.configuration.minioEndpoint $ }}
+        - name: MINIO_BUCKET_NAME
+          value: {{ .Values.minio.bucketName }}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: upload-service
+  labels:
+    run: upload-service 
+spec:
+  type: NodePort
+  ports:
+  - port: 8080
+    targetPort: 8081
+    protocol: TCP
+    nodePort: 30081 
+  selector:
+    run: upload-service

@@ -34,10 +34,10 @@ services:
     ports: 
       - 8083:8080
     environment:
-      ACCESS_KEY: water
-      SECRET_KEY: bottler123
-      ENDPOINT: minio:9000
-      BUCKET_NAME: water-buckid
+      MINIO_ACCESS_KEY: water
+      MINIO_SECRET_KEY: bottler123
+      MINIO_ENDPOINT: minio:9000
+      MINIO_BUCKET_NAME: water-buckid
 
   object-recognition-service:
     build: ./object-recognition-service/

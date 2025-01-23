@@ -34,6 +34,7 @@ Therefor the following must be installed:
 - [Minikube](https://github.com/kubernetes/minikube)
 - [kubectl](https://kubernetes.io/docs/tasks/tools/)
 - [docker](https://docs.docker.com/engine/install/)
+- [helm]()
 
 ### Starting
 
@@ -45,7 +46,7 @@ minikube start
 
     Optionally you can specify the resource amount the cluster should use. Use `minikube start --help` for more information.
 
-Publish all images of local services into the cluster using the script:
+Build all images of local services into the cluster using the script:
 
 ```sh
 sh ./build-all-local.sh
@@ -55,13 +56,14 @@ This publishes the version of your local services to the cluster. In some cases 
 
 ### Running the application
 
-Run the application by passing the `deploy` keyword to the build-all-local.sh script.
+Use helm: 
 
 ```sh
-sh ./build-all-local.sh deploy
+helm install water-bottler ./helm-chart
 ```
 
-The script finished with 3 endpoints:
-- The very top one is the api endpoint. Test it with `curl -X POST -F image=@test-image.jpg -H "X-API-KEY: amVmZnMtd2F0ZXItYm90dGxlci1leGFtcGxlLWFwaS1rZXk=" localhost:49691/upload -s -o /dev/null -w "%{http_code}"`(not that the testimage must be present)
-- The second is redundant to the first
-- The third one is the web interface of the smtp dev server
+To get the adress of a service use:
+```sh
+# for upload service
+minikube service upload-service --url 
+```
