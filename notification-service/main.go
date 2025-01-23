@@ -8,9 +8,11 @@ import (
 	"io"
 	"net/http"
 	"net/smtp"
+	"net/url"
 	"os"
 	"strings"
 
+	queueconnector "github.com/coffeemakingtoaster/water-bottler/notification-service/pkg/queue_connector"
 	"github.com/rs/zerolog/log"
 )
 
@@ -22,13 +24,14 @@ var SMTP_SERVER_PASSWORD string
 var MAIL_TEMPLATE *template.Template
 
 type MailRequestData struct {
-	Email   string `json:"email"`
-	ImageId string `json:"imageid"`
-	From    string
+	Email     string `json:"email"`
+	ImageId   string `json:"imageid"`
+	From      string
+	SourceUri string
 }
 
 func getHealth(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Got health request")
+	log.Debug().Msg("Got health request")
 	io.WriteString(w, "ok")
 }
 
@@ -43,6 +46,7 @@ func sendMail(w http.ResponseWriter, r *http.Request) {
 	}
 
 	requestData.From = "notification@water-bottler.com"
+	requestData.SourceUri = "https://water-bottler.com"
 
 	var message bytes.Buffer
 
@@ -62,7 +66,37 @@ func sendMail(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	fmt.Println("Email Sent Successfully!")
+	log.Debug().Msg("Email Sent Successfully!")
+}
+
+func jobConsumer(queueConnectionString string) {
+	log.Debug().Msgf("Starting job consumer")
+	queueconnector.QueueUrl = queueConnectionString
+	if len(queueconnector.QueueUrl) == 0 {
+		log.Fatal().Msg("No queue url specified via the QUEUE_URL env variable!")
+	}
+	log.Debug().Msgf("Queue url is %s", queueconnector.QueueUrl)
+
+	finishedJobs, success := queueconnector.ConsumeJobFromQueue()
+	if !success {
+		log.Fatal().Msg("Could not consume jobs from queue")
+	}
+
+	for job := range finishedJobs {
+		log.Debug().Msgf("Received job: %v", job)
+
+		// Send mail to user
+		var requestData MailRequestData
+		requestData.Email = job.UserEmail
+		requestData.ImageId = job.ImageId
+
+		req := http.Request{
+			Method: "POST",
+			URL:    &url.URL{Path: "/send-mail"},
+			Body:   io.NopCloser(strings.NewReader(fmt.Sprintf(`{"email": "%s", "imageid": "%s"}`, requestData.Email, requestData.ImageId))),
+		}
+		sendMail(nil, &req)
+	}
 }
 
 func main() {
@@ -86,10 +120,13 @@ func main() {
 		panic(fmt.Sprintf("Could not parse mail template due to an error: %s", err.Error()))
 	}
 
+	// Start the job consumer and send mail notification if a job is finished
+	go jobConsumer(os.Getenv("QUEUE_URL"))
+
 	http.HandleFunc("/health", getHealth)
 	http.HandleFunc("/send-mail", sendMail)
 	addr := fmt.Sprintf("%s:%d", interfaceIP, interfacePort)
 	log.Info().Msgf("Starting notification service on %s", addr)
 	err = http.ListenAndServe(addr, nil)
-	fmt.Printf("Server encountered error: %v", err)
+	log.Fatal().Msgf("Server encountered error: %v", err)
 }
