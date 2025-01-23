@@ -56,7 +56,7 @@ func getClient() *minio.Client {
 		return client
 	}
 
-	err = client.MakeBucket(context.TODO(), bucketName, minio.MakeBucketOptions{})
+	err = client.MakeBucket(context.TODO(), bucketName, minio.MakeBucketOptions{Region: "us-east-1"})
 
 	if err != nil {
 		log.Warn().Msgf("Could not create bucket due to an error: %s", err.Error())
