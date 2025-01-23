@@ -26,6 +26,7 @@ services:
       SMTP_SERVER_URL: smtp4dev:2525
       SMTP_SERVER_USERNAME: water
       SMTP_SERVER_PASSWORD: bottler
+      QUEUE_URL: amqp://water:bottler@rabbitmq:5672
 
   download-service:
     build: ./download-service/
