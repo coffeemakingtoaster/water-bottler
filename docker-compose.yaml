@@ -27,6 +27,7 @@ services:
       SMTP_SERVER_USERNAME: water
       SMTP_SERVER_PASSWORD: bottler
       QUEUE_URL: amqp://water:bottler@rabbitmq:5672
+      SOURCE_URI: http://localhost:8083
 
   download-service:
     build: ./download-service/

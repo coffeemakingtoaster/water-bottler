@@ -46,7 +46,7 @@ func sendMail(w http.ResponseWriter, r *http.Request) {
 	}
 
 	requestData.From = "notification@water-bottler.com"
-	requestData.SourceUri = "https://water-bottler.com"
+	requestData.SourceUri = os.Getenv("SOURCE_URI")
 
 	var message bytes.Buffer
 
