@@ -31,6 +31,8 @@ var AuthApiUrl string
 
 var httpClient = http.Client{}
 
+var authServiceIsReachable = true
+
 // How long can an api key be cached before we throw it out
 const API_KEY_TTL = time.Minute * 2
 
@@ -80,12 +82,14 @@ func validateAPIKeyViaAuthService(key string) (string, error) {
 
 	if res == nil || err != nil {
 		returnErr := &customerror.SystemCommunicationError{Reason: fmt.Sprintf("Could not comlete request due to an error: %s", err.Error())}
+		authServiceIsReachable = false
 		log.Error().Msg(returnErr.Error())
 		return "", returnErr
 	}
 
 	if res.StatusCode != http.StatusOK {
 		returnErr := &customerror.SystemCommunicationError{Reason: fmt.Sprintf("Got invalid response code %d", res.StatusCode)}
+		authServiceIsReachable = false
 		log.Warn().Msg(returnErr.Error())
 		return "", returnErr
 	}
@@ -99,6 +103,8 @@ func validateAPIKeyViaAuthService(key string) (string, error) {
 		log.Error().Msg(returnErr.Error())
 		return "", returnErr
 	}
+
+	authServiceIsReachable = true
 
 	if resp.Status != "valid" {
 		return "", customerror.NewSafeErrorFromError(errors.New("Invalid API Key"))

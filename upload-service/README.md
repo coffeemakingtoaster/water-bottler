@@ -3,8 +3,12 @@
 Service for uploading images to the system.
 Runs on port 8081.
 
-To specify the domain of the auth service used for API key validation use the `AUTH_SERVICE_URL` env variable.
-To specify the domain of the rabbitmq instance use the `QUEUE_URL` env variable.
+- AUTH_SERVICE_URL 
+- QUEUE_URL
+- MINIO_ACCESS_KEY
+- MINIO_SECRET_KEY
+- MINIO_ENDPOINT
+- MINIO_BUCKET_NAME
 
 <details>
 
