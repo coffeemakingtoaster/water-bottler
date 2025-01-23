@@ -26,10 +26,10 @@ jobs:
       - uses: azure/setup-helm@v4.2.0
 
       - name: helm prepare
-        run: >
-            helm repo add bitnami https://charts.bitnami.com/bitnami \
-            && helm repo add prometheus-community https://prometheus-community.github.io/helm-charts  \
-            && helm dependency build
+        run: |
+            helm repo add bitnami https://charts.bitnami.com/bitnami 
+            helm repo add prometheus-community https://prometheus-community.github.io/helm-charts  
+            helm dependency build
 
       - name: lint chart
         run: helm lint .
