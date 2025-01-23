@@ -70,7 +70,12 @@ func main() {
 	if err == nil {
 		objectStoreConnAvailable = true
 	} else {
-		log.Error().Err(err).Msg("Error checking bucket")
+		err = minioClient.MakeBucket(bucketName, "us-east-1")
+		if err != nil {
+			log.Error().Err(err).Msg("Error creating bucket")
+		} else {
+			objectStoreConnAvailable = true
+		}
 	}
 
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
