@@ -8,6 +8,9 @@ If you are using minikube this can be done with the `build-all-local.sh` script.
 Alternatively there are `main` packages on github.
 
 ```sh
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm dependency build
 helm install release-name .
 ```
 
