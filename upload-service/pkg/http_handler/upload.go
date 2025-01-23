@@ -1,7 +1,6 @@
 package httphandler
 
 import (
-	"io"
 	"net/http"
 	"time"
 
@@ -43,7 +42,7 @@ func HandleUpload(w http.ResponseWriter, r *http.Request) {
 	success := imagestore.UploadImage(file, header.Size, imageId)
 
 	if !success {
-		log.Warn().Msgf("Could not upload image due to an error: %s", err.Error())
+		log.Warn().Msgf("Could not upload image")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

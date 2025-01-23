@@ -3,10 +3,12 @@ package queueconnector_test
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"testing"
 	"time"
 
 	queueconnector "github.com/coffeemakingtoaster/water-bottler/upload-service/pkg/queue_connector"
+	"github.com/coffeemakingtoaster/water-bottler/upload-service/pkg/util"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/testcontainers/testcontainers-go/modules/rabbitmq"
 )
@@ -49,6 +51,8 @@ func checkForMessage(connectionURI, queueName string) (queueconnector.Job, error
 }
 
 func Test_publishWithoutConnection(t *testing.T) {
+	queueconnector.QueueUrl = fmt.Sprintf("amqp://water:bottler@localhost:%d/", util.GetAvailablePort())
+
 	success := queueconnector.AddJobToQueue(TEST_JOB)
 
 	if success {

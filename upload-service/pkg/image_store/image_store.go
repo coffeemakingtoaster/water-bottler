@@ -3,10 +3,8 @@ package imagestore
 import (
 	"context"
 	"io"
-	"mime/multipart"
 	"os"
 
-	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/rs/zerolog/log"
