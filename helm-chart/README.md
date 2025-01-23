@@ -20,3 +20,11 @@ Wait for this command to return something if in doubt:
 ```sh
 kubectl get --raw /apis/custom.metrics.k8s.io/v1beta1 | jq '.resources.[].name' | grep services/rabbitmq_queue_messages_ready
 ```
+
+### Uninstall
+
+Remove from cluster
+
+```sh
+helm uninstall <release name>
+```

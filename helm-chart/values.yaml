@@ -41,6 +41,7 @@ downloadService:
 # override for adapter
 prometheus-adapter:
   prometheus:
+    # TODO: This could lead to issues, maybe?
     url: http://prometheus-stack-kube-prom-prometheus.default.svc.cluster.local
     port: 9090
     path: ""
