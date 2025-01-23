@@ -22,6 +22,14 @@ spec:
           value: "http://authentication-service.default.svc.cluster.local:8080"
         - name: QUEUE_URL
           value: "amqp://water:bottler@dev-cluster.default.svc.cluster.local:5672"
+        - name: MINIO_ACCESS_KEY
+          value: water
+        - name: MINIO_SECRET_KEY
+          value: bottler123
+        - name: MINIO_ENDPOINT
+          value: "minio-service.default.svc.cluster.local:9000"
+        - name: MINIO_BUCKET_NAME
+          value: water-buckid
 
 ---
 
