@@ -14,18 +14,18 @@ spec:
     spec:
       containers:
       - name: download-service
-        image: github.com/coffeemakingtoaster/water-bottler/download-service:local
+        image: github.com/coffeemakingtoaster/water-bottler/download-service:{{ .Values.globalImageTag }}
         ports:
         - containerPort: 8080
         env:
         - name: MINIO_ACCESS_KEY
-          value: water
+          value: {{ .Values.minio.accessKey }}
         - name: MINIO_SECRET_KEY
-          value: bottler123
+          value: {{ .Values.minio.accessKeySecret }}
         - name: MINIO_ENDPOINT
-          value: "minio-service.default.svc.cluster.local:9000"
+          value: {{ tpl $.Values.downloadService.configuration.minioEndpoint $ }}
         - name: MINIO_BUCKET_NAME
-          value: water-buckid
+          value: {{ .Values.minio.bucketName }}
 
 ---
 

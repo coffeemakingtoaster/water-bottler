@@ -14,22 +14,22 @@ spec:
     spec:
       containers:
       - name: upload-service
-        image: github.com/coffeemakingtoaster/water-bottler/upload-service:local
+        image: github.com/coffeemakingtoaster/water-bottler/upload-service:{{ .Values.globalImageTag }}
         ports:
         - containerPort: 8081
         env:
         - name: AUTH_SERVICE_URL
-          value: "http://authentication-service.default.svc.cluster.local:8080"
+          value: {{ tpl $.Values.uploadService.configuration.authServiceURL $ }}
         - name: QUEUE_URL
-          value: "amqp://water:bottler@dev-cluster.default.svc.cluster.local:5672"
+          value: {{ tpl $.Values.uploadService.configuration.queueURL $ }}
         - name: MINIO_ACCESS_KEY
-          value: water
+          value: {{ .Values.minio.accessKey }}
         - name: MINIO_SECRET_KEY
-          value: bottler123
+          value: {{ .Values.minio.accessKeySecret }}
         - name: MINIO_ENDPOINT
-          value: "minio-service.default.svc.cluster.local:9000"
+          value: {{ tpl $.Values.uploadService.configuration.minioEndpoint $ }}
         - name: MINIO_BUCKET_NAME
-          value: water-buckid
+          value: {{ .Values.minio.bucketName }}
 
 ---
 

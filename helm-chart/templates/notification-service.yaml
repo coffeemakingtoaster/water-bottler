@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-service 
+spec:
+  selector:
+    matchLabels:
+      run: notification-service
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: notification-service
+    spec:
+      containers:
+      - name: notification-service
+        image: github.com/coffeemakingtoaster/water-bottler/notification-service:{{ .Values.globalImageTag }}
+        ports:
+        - containerPort: 8080
+        env:
+        {{ if .Values.enableSMTPDev }}
+        - name: SMTP_SERVER_URL
+          value: smtp4dev.{{ .Release.Namespace }}.svc.cluster.local:2525
+        {{ else }}
+        - name: SMTP_SERVER_URL
+          value: {{ .Values.notificationService.configuration.smtpServerURL }} 
+        - name: SMTP_SERVER_USERNAME
+          value: {{ .Values.notificationService.configuration.smtpAuthUsername }}
+        - name: SMTP_SERVER_PASSWORD
+          value: {{ .Values.notificationService.configuration.smtpAuthPassword }}
+        {{ end }}
+        - name: QUEUE_URL
+          value: {{ tpl $.Values.notificationService.configuration.queueURL $ }}
+        - name: SOURCE_URI
+          # This assumes that there will be a forward for download service to 8083
+          value: {{ .Values.notificationService.configuration.sourceURI }}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification-service
+  labels:
+    run: notification-service 
+spec:
+  type: NodePort
+  ports:
+  - port: 8080
+    protocol: TCP
+  selector:
+    run: notification-service

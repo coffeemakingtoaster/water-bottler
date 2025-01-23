@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
       - name: object-recognition-service
-        image: github.com/coffeemakingtoaster/water-bottler/object-recognition-service:local
+        image: github.com/coffeemakingtoaster/water-bottler/object-recognition-service:{{ .Values.globalImageTag }}
 
 ---
 

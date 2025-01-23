@@ -1,16 +1,16 @@
+
 apiVersion: v1
-data:
-  db.yaml: |-
-    apiKeys:
-      - name: "jeff@water-bottler.local"
-        key: "amVmZnMtd2F0ZXItYm90dGxlci1leGFtcGxlLWFwaS1rZXk="
-        validUntil: "2036-12-31T23:59:59Z"
-      - name: "emañuel@water-bottler.local"
-        key: "ZW1hw7F1ZWwtd2F0ZXItYm90dGxlci1leGFtcGxlLWFwaS1rZXk="
-        validUntil: "1982-01-01T00:00:00Z"
 kind: ConfigMap
 metadata:
   name: auth-database
+data:
+  db.yaml: |-
+    apiKeys:
+    {{ range .Values.apiKeys }}
+      - name: "{{ .name }}"
+        key: "{{ .key }}"
+        validUntil: "{{ .validUntil }}"
+    {{ end }}
 
 ---
 
@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
       - name: authentication-service
-        image: github.com/coffeemakingtoaster/water-bottler/authentication-service:local
+        image: github.com/coffeemakingtoaster/water-bottler/authentication-service:{{ .Values.globalImageTag }}
         ports:
         - containerPort: 8080
         volumeMounts:
