@@ -13,6 +13,10 @@ services:
     environment:
       AUTH_SERVICE_URL: http://authentication-service:8080
       QUEUE_URL: amqp://water:bottler@rabbitmq:5672
+      MINIO_ACCESS_KEY: water
+      MINIO_SECRET_KEY: bottler123
+      MINIO_ENDPOINT: minio:9000
+      MINIO_BUCKET_NAME: water-bottler
 
   notification-service:
     build: ./notification-service/

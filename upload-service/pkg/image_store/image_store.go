@@ -22,10 +22,10 @@ var objectStoreAvailable = false
 var bucketExists = false
 
 func init() {
-	accessKeyID = os.Getenv("ACCESS_KEY")
-	secretAccessKey = os.Getenv("SECRET_KEY")
-	endpoint = os.Getenv("ENDPOINT")
-	bucketName = os.Getenv("BUCKET_NAME")
+	accessKeyID = os.Getenv("MINIO_ACCESS_KEY")
+	secretAccessKey = os.Getenv("MINIO_SECRET_KEY")
+	endpoint = os.Getenv("MINIO_ENDPOINT")
+	bucketName = os.Getenv("MINIO_BUCKET_NAME")
 }
 
 func getClient() *minio.Client {
@@ -33,6 +33,7 @@ func getClient() *minio.Client {
 		var err error
 		client, err = minio.New(endpoint, &minio.Options{Secure: false, Creds: credentials.NewStaticV4(accessKeyID, secretAccessKey, "")})
 		if err != nil {
+			log.Warn().Msgf("Could not create minio client due to an error: %s", err.Error())
 			objectStoreAvailable = false
 			return nil
 		}
@@ -73,6 +74,7 @@ func UploadImage(file io.Reader, size int64, imageid string) bool {
 	}
 	info, err := c.PutObject(context.TODO(), bucketName, imageid, file, size, minio.PutObjectOptions{ContentType: "application/octet-stream"})
 	if err != nil {
+		log.Warn().Msgf("Could not upload image due to an error: %s", err.Error())
 		objectStoreAvailable = false
 		return false
 	}
