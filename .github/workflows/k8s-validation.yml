@@ -5,13 +5,13 @@ on:
     branches:
       - main
     paths:
-      - helm-chart
+      - helm-chart/**
 
   push:
     branches:
       - main
     paths:
-      - helm-chart
+      - helm-chart/**
 
 jobs:
   validate-k8s-definitions:
