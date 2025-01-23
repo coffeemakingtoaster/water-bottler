@@ -1,0 +1,24 @@
+prometheus:
+  url: http://prometheus-stack-kube-prom-prometheus.default.svc.cluster.local
+  port: 9090
+  path: ""
+
+replicas: 1
+
+rules:
+  default: true
+
+  custom: 
+  - seriesQuery: 'rabbitmq_queue_messages_ready{container="rabbitmq"}'
+    resources:
+      overrides:
+        namespace: {resource: "namespace"}
+        pod: {resource: "pod"}
+    name:
+      matches: "^(.*)_ready$"
+      as: "${1}"
+    metricsQuery: 'avg_over_time(<<.Series>>[5m])'
+
+  existing:
+
+  external: []
