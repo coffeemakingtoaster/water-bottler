@@ -2,6 +2,7 @@ package httphandler
 
 import (
 	"net/http"
+	"strings"
 	"time"
 
 	imagestore "github.com/coffeemakingtoaster/water-bottler/upload-service/pkg/image_store"
@@ -37,8 +38,10 @@ func HandleUpload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	imageId := uuid.New().String()
+	fileNameSlices := strings.Split(header.Filename, ".")
+	fileExtension := fileNameSlices[len(fileNameSlices)-1:][0]
 
+	imageId := uuid.New().String() + "." + fileExtension
 	success := imagestore.UploadImage(file, header.Size, imageId)
 
 	if !success {
