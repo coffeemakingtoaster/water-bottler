@@ -5,72 +5,26 @@ on:
     branches:
       - main
     paths:
-      - authentication-service/**/*.yaml
-      - download-service/**/*.yaml
-      - notification-service/**/*.yaml
-      - upload-service/**/*.yaml
-      - development-deployments/**/*.yaml
+      - helm-chart
 
   push:
     branches:
       - main
     paths:
-      - authentication-service/**/*.yaml
-      - download-service/**/*.yaml
-      - notification-service/**/*.yaml
-      - upload-service/**/*.yaml
-      - development-deployments/**/*.yaml
+      - helm-chart
 
 jobs:
-  determine-relevant-dirs:
-    runs-on: ubuntu-latest
-    outputs:
-      changed_directories: ${{ steps.set-output.outputs.changed_directories }}
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: Get changed files
-        id: changed-files
-        uses: tj-actions/changed-files@v45
-        with:
-          dir_names: true
-          dir_names_max_depth: 1  
-          json: true
-          quotepath: false
-          files: |
-            authentication-service/**/*.yaml
-            download-service/**/*.yaml
-            notification-service/**/*.yaml
-            upload-service/**/*.yaml
-            development-deployments/**/*.yaml
-
-      - name: 'Set output in the matrix format'
-        id: set-output
-        run: echo "changed_directories={\"dir\":${{ steps.changed-files.outputs.all_changed_files }}}" >> "$GITHUB_OUTPUT"
-
   validate-k8s-definitions:
-    if: ${{ needs.determine-relevant-dirs.outputs.changed_directories != '' }}  
     runs-on: ubuntu-latest
-    strategy:
-      matrix: ${{fromJson(needs.determine-relevant-dirs.outputs.changed_directories)}}
-    needs:
-      - determine-relevant-dirs 
     defaults:
       run:
         shell: bash
-        working-directory: ${{ matrix.dir }}
+        working-directory: helm-chart
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-go@v4
-        with:
-          go-version: '1.23.3' 
+      - uses: azure/setup-helm@v4.2.0
 
-      - name: install validator
-        run: go install github.com/yannh/kubeconform/cmd/kubeconform@latest 
+      - name: lint chart
+        run: helm lint .
 
-      # Ignore missing because kubeconform cannot validate rabbitmq custom resources
-      - name: validation
-        run: kubeconform -summary -ignore-missing-schemas ./*.yaml
