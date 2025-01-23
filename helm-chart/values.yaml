@@ -22,7 +22,7 @@ rabbitmq:
 uploadService:
   configuration:
     authServiceURL: http://authentication-service.{{ .Release.Namespace }}.svc.cluster.local:8080
-    queueURL: amqp://water:bottler@dev-cluster.{{ .Release.Namespace }}.svc.cluster.local:5672
+    queueURL: amqp://{{ .Values.minio.accessKey }}:{{ .Values.minio.accessKeySecret }}@dev-cluster.{{ .Release.Namespace }}.svc.cluster.local:5672
     minioEndpoint: minio-service.{{ .Release.Namespace }}.svc.cluster.local:9000
 
 notificationService:
@@ -30,6 +30,9 @@ notificationService:
     smtpServerURL: 
     smtpAuthUsername:
     smtpAuthPassword:
+    queueURL: amqp://{{ .Values.minio.accessKey }}:{{ .Values.minio.accessKeySecret }}@dev-cluster.{{ .Release.Namespace }}.svc.cluster.local:5672
+    # This assumes a port forward of the download service to port 8083
+    sourceURI: http://localhost:8083
 
 downloadService:
   configuration:

@@ -29,6 +29,11 @@ spec:
         - name: SMTP_SERVER_PASSWORD
           value: {{ .Values.notificationService.configuration.smtpAuthPassword }}
         {{ end }}
+        - name: QUEUE_URL
+          value: {{ tpl $.Values.notificationService.configuration.queueURL $ }}
+        - name: SOURCE_URI
+          # This assumes that there will be a forward for download service to 8083
+          value: {{ .Values.notificationService.configuration.sourceURI }}
 
 ---
 
