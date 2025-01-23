@@ -66,13 +66,17 @@ func main() {
 	}
 
 	// Check if the service has access to the bucket
-	_, err = minioClient.BucketExists(bucketName)
-	if err == nil {
-		objectStoreConnAvailable = true
+	bucketExists, err := minioClient.BucketExists(bucketName)
+	if err != nil {
+		log.Error().Err(err).Msg("Error checking bucket")
 	} else {
-		err = minioClient.MakeBucket(bucketName, "us-east-1")
-		if err != nil {
-			log.Error().Err(err).Msg("Error creating bucket")
+		if !bucketExists {
+			err = minioClient.MakeBucket(bucketName, "us-east-1")
+			if err != nil {
+				log.Error().Err(err).Msg("Error creating bucket")
+			} else {
+				objectStoreConnAvailable = true
+			}
 		} else {
 			objectStoreConnAvailable = true
 		}
