@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: notification-service
-        image: github.com/coffeemakingtoaster/water-bottler/notification-service:{{ .Values.globalImageTag }}
+        image: ghcr.io/coffeemakingtoaster/water-bottler/notification-service:{{ .Values.globalImageTag }}
         ports:
         - containerPort: 8080
         env:

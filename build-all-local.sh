@@ -24,7 +24,7 @@ for dir in "${SERVICE_DIRECORIES[@]}"; do
 	if [ ! -f $dir/Dockerfile ]; then
     		echo "${YELLOW}No Dockerfile for ${dir}! Skipping service...${NC}"
 	else
-		docker build --quiet -t "github.com/coffeemakingtoaster/water-bottler/${dir}:local" ./${dir}
+		docker build --quiet -t "ghcr.io/coffeemakingtoaster/water-bottler/${dir}:local" ./${dir}
 		echo "${GREEN}Build for ${PURPLE}${dir}${GREEN} done!${NC}"
 	fi
 done

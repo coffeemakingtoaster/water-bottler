@@ -30,7 +30,7 @@ spec:
     spec:
       containers:
       - name: authentication-service
-        image: github.com/coffeemakingtoaster/water-bottler/authentication-service:{{ .Values.globalImageTag }}
+        image: ghcr.io/coffeemakingtoaster/water-bottler/authentication-service:{{ .Values.globalImageTag }}
         ports:
         - containerPort: 8080
         volumeMounts:

@@ -5,7 +5,9 @@
 If you are using the `local` image tag it is expected that the images are present in your cluster.
 If you are using minikube this can be done with the `build-all-local.sh` script...if you are using something else you will have to figure this out yourself.
 
-Alternatively there are `main` packages on github.
+Alternatively there are `latest` packages on github.
+
+    NOTE: These are not supported for arm because the github arm runners take about 10x the time to build arm docker images and we have limited runner minutes :)
 
 ```sh
 helm repo add bitnami https://charts.bitnami.com/bitnami
