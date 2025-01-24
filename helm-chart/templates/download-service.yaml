@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: download-service
-        image: github.com/coffeemakingtoaster/water-bottler/download-service:{{ .Values.globalImageTag }}
+        image: ghcr.io/coffeemakingtoaster/water-bottler/download-service:{{ .Values.globalImageTag }}
         ports:
         - containerPort: 8080
         env:

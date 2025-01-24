@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: upload-service
-        image: github.com/coffeemakingtoaster/water-bottler/upload-service:{{ .Values.globalImageTag }}
+        image: ghcr.io/coffeemakingtoaster/water-bottler/upload-service:{{ .Values.globalImageTag }}
         ports:
         - containerPort: 8081
         env:
