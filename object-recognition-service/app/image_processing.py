@@ -22,7 +22,7 @@ class WaterBottleImageProcessor:
         box_coordinates: List[np.ndarray],
     ) -> Image.Image:
         """
-        Overlays the water bottle image on top of given image at the provided box_cooridnates.
+        Overlays the water bottle image on top of given image at the provided box_coordinates.
 
         Args:
             image (str): The path of the image to overlay the water bottle on.
