@@ -1,38 +1,52 @@
-import os
-from config import CONFIG
+import json
 from object_detection import BeerDetector
 from image_processing import WaterBottleImageProcessor
+from rabbitmq_connector import RabbitMQConnector
+from minio_connector import MinioConnector
+
+
+def onImageEventReceived(ch, method, properties, body):
+    # Read the payload
+    payload = json.loads(body)
+    image_id = payload["image_id"]
+    email = payload["email"]
+
+    # Get the image from Minio
+    image = minio.get_image(image)
+
+    # Predict the bounding boxes of potential beer containers in the image
+    boxes, conf = beer_detection_model.predict(image)
+    high_conf_boxes = boxes[conf > 0.5]
+
+    # Process the image by overlaying a water bottle on top of the detected beer containers
+    edited_image = water_bottle_processor.process(image, high_conf_boxes)
+
+    # Save the edited image back to Minio
+    minio.set_image(image_id, edited_image)
+
+    # Publish a task finish event
+    queue_connector.publish_task_finish_event(image_id, email)
+
+    # Acknowledge the message
+    ch.basic_ack(delivery_tag=method.delivery_tag)
+
 
 if __name__ == "__main__":
     print("Starting Object Recognition Service")
 
-    # Initialize needed classes
+    # Setup Image processing classes
     beer_detection_model = BeerDetector()
-    water_bottle_processor = WaterBottleImageProcessor(CONFIG.WATER_BOTTLE_PATH)
+    water_bottle_processor = WaterBottleImageProcessor("water_bottle.png")
 
-    # Load images in the example folder...
-    # This will later be replaced with a
-    # listener to the rabbitmq queue to retrieve images
-    # from the image storage solution
-    print(f"Loading images from {CONFIG.INPUT_DIR}")
+    # Setup Minio connection
+    minio = MinioConnector()
 
-    image_paths = [
-        os.path.join(CONFIG.INPUT_DIR, image_name)
-        for image_name in os.listdir(CONFIG.INPUT_DIR)
-        if image_name.endswith((".jpeg", ".jpg", ".png"))
-    ]
+    # Setup RabbitMQ connections
+    queue_connector = RabbitMQConnector()
+    queue_connector.register_callback(
+        queue="image-workload",
+        callback=onImageEventReceived,
+    )
 
-    print(f"Found {len(image_paths)} images")
-
-    # Make sure the output path exists...
-    os.makedirs(CONFIG.OUTPUT_DIR, exist_ok=True)
-
-    for image_path in image_paths:
-        print(f"Processing Image {image_path}")
-        boxes, conf = beer_detection_model.predict(image_path)
-        high_conf_boxes = boxes[conf > CONFIG.CONFIDENCE_THRESHOLD]
-        print(f"Found {len(high_conf_boxes)} high confidence beer containers")
-        edited_image = water_bottle_processor.process(image_path, high_conf_boxes)
-        edited_image.save(CONFIG.OUTPUT_DIR + "/" + os.path.basename(image_path))
-
-    print(f"Saved processed images to {CONFIG.OUTPUT_DIR}")
+    print("Waiting for messages... To exit press CTRL+C")
+    queue_connector.start_listening()

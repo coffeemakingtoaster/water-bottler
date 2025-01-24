@@ -3,7 +3,6 @@ from typing import Tuple
 
 from ultralytics import YOLOWorld
 from numpy import ndarray
-from config import CONFIG
 
 
 class BeerDetector:
@@ -48,8 +47,8 @@ class BeerDetector:
         try:
             result = self.model.predict(
                 image_path,
-                iou=CONFIG.IOU_THRESHOLD,
-                conf=CONFIG.CONFIDENCE_THRESHOLD,
+                iou=0.4,
+                conf=0.5,
                 agnostic_nms=True,
                 save=False,
                 verbose=False,
