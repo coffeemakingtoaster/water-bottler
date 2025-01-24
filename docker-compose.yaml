@@ -43,6 +43,16 @@ services:
     build: ./object-recognition-service/
     ports:
       - 8084:8080
+    environment:
+      MINIO_USER: water
+      MINIO_KEY: bottler123
+      MINIO_ENDPOINT: minio:9000
+      MINIO_BUCKET: water-buckid
+      QUEUE_HOST: rabbitmq
+      QUEUE_USER: water
+      QUEUE_PASS: bottler
+      QUEUE_INPUT_NAME: image-workload
+      QUEUE_OUTPUT_NAME: finished-jobs
 
   rabbitmq:
     image: rabbitmq:3-management-alpine

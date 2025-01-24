@@ -3,7 +3,8 @@ import numpy as np
 
 from PIL import Image
 from typing import List
-from config import CONFIG
+
+IMAGE_SCALE_FACTOR = 1.5
 
 
 class WaterBottleImageProcessor:
@@ -53,8 +54,8 @@ class WaterBottleImageProcessor:
 
             # Scaling the water bottle image to fit the bounding box
             # but keeping the aspect ratio
-            target_width = int(width * CONFIG.SCALE_FACTOR)
-            target_height = int(height * CONFIG.SCALE_FACTOR)
+            target_width = int(width * IMAGE_SCALE_FACTOR)
+            target_height = int(height * IMAGE_SCALE_FACTOR)
 
             aspect_ratio = self.water_bottle.width / self.water_bottle.height
             if target_width / target_height > aspect_ratio:
