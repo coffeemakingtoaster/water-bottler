@@ -21,8 +21,8 @@ class MinioConnector:
             # Make sure the bucket exists
             if not self.client.bucket_exists(self.bucket_name):
                 self.client.make_bucket(self.bucket_name)
-        except:
-            raise RuntimeError("Could not connect to Minio server")
+        except Exception as e:
+            raise RuntimeError(f"Could not connect to Minio server {str(e)}")
 
     def get_image(self, image_id) -> Image:
         response = self.client.get_object(self.bucket_name, image_id, f"{image_id}")
