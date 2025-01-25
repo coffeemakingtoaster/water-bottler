@@ -19,7 +19,7 @@ var QUEUE_CHANNEL_NAME = "finished-jobs"
 
 type FinishedJob struct {
 	ImageId   string `json:"image_id"`
-	UserEmail string `json:"user_mail"`
+	UserEmail string `json:"email"`
 }
 
 func init() {

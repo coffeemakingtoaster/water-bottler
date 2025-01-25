@@ -1,5 +1,6 @@
 services:
   authentication-service:
+    restart: always
     build: ./authentication-service/
     ports: 
       - 8080:8080
@@ -7,6 +8,7 @@ services:
       - ./authentication-service/db.yaml.examble:/app/db.yaml
 
   upload-service:
+    restart: always
     build: ./upload-service/
     ports: 
       - 8081:8081
@@ -19,17 +21,17 @@ services:
       MINIO_BUCKET_NAME:  water-buckid
 
   notification-service:
+    restart: always
     build: ./notification-service/
     ports: 
       - 8082:8080
     environment:
-      SMTP_SERVER_URL: smtp4dev:2525
-      SMTP_SERVER_USERNAME: water
-      SMTP_SERVER_PASSWORD: bottler
+      SMTP_SERVER_URL: smtp4dev:25
       QUEUE_URL: amqp://water:bottler@rabbitmq:5672
       SOURCE_URI: http://localhost:8083
 
-  download-service:
+  download-service: 
+    restart: always
     build: ./download-service/
     ports: 
       - 8083:8080
@@ -40,6 +42,7 @@ services:
       MINIO_BUCKET_NAME: water-buckid
 
   object-recognition-service:
+    restart: always
     build: ./object-recognition-service/
     ports:
       - 8084:8080
@@ -71,8 +74,6 @@ services:
       - "2525:25"    # SMTP port
     environment:
       ServerOptions__Urls: "http://*:80"
-      RelayOptions__Login: water
-      RelayOptions__Password: bottler
       ServerOptions__HostName: water-bottler-mail
 
   # Minio because it exposes an s3 api similar to rook object storage
