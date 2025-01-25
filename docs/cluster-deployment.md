@@ -26,6 +26,8 @@
 **DISCLAIMER**
 All commands are executed as the root user, please adjust the commands accordingly if you are using a different user.
 This setup uses two subnets for the communication between the nodes. 
+Keep in mind that every cluster environment is different and the setup might not work for your environment.
+
 The first subnet is used for the communication between the nodes and the host.
 The second subnet is used for the communication between the pods.
 
@@ -205,6 +207,19 @@ Apply the flannel configuration.
 ```bash
 kubectl apply ./kube-flannel.yml
 ```
+
+A healthy cluster should show the following output.
+```bash
+kubectl get nodes
+
+NAME          STATUS   ROLES           AGE    VERSION
+k8s-node-00   Ready    control-plane   3d4h   v1.32.1
+k8s-node-01   Ready    <none>          3d4h   v1.32.1
+k8s-node-02   Ready    <none>          3d4h   v1.32.1
+```
+
+We recomment to use k9s to monitor the cluster, as it is most superior to the kubectl command and also improves terminal-only workflows.
+![k9s_HealthyCluster](./images/k9s_HealthyCluster.png)
 
 # Troubleshooting
 
