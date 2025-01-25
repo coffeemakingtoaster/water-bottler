@@ -53,6 +53,7 @@ services:
       QUEUE_PASS: bottler
       QUEUE_INPUT_NAME: image-workload
       QUEUE_OUTPUT_NAME: finished-jobs
+      SLOW_MODE_DELAY: 0
 
   rabbitmq:
     image: rabbitmq:3-management-alpine

@@ -1,30 +1,61 @@
+import os
 import json
 from object_detection import BeerDetector
 from image_processing import WaterBottleImageProcessor
 from rabbitmq_connector import RabbitMQConnector
 from minio_connector import MinioConnector
 
+SLOW_MODE_DELAY = os.getenv("SLOW_MODE_DELAY", 0)
+
 
 def onImageEventReceived(ch, method, properties, body):
     # Read the payload
-    payload = json.loads(body)
-    image_id = payload["image_id"]
-    email = payload["user_mail"]
+    try:
+        payload = json.loads(body)
+        image_id = payload["image_id"]
+        email = payload["user_mail"]
+    except:
+        print("ERROR: Invalid message payload")
+        # TODO: How to handle messages with invalid payload?
+        ch.basic_ack(delivery_tag=method.delivery_tag)
+        return
 
     # Get the image from Minio
-    image = minio.get_image(image_id)
+    try:
+        print(f"Getting image from Minio with id {image_id}")
+        image = minio.get_image(image_id)
+    except:
+        print("ERROR: Could not get image from Minio")
+        return
 
     # Predict the bounding boxes of potential beer containers in the image
     boxes = beer_detection_model.predict(image)
+    print("Detected beer containers:", boxes, "in image", image_id)
+
+    # Slow down the processing to simulate a slow service for presentation
+    # purposes
+    if SLOW_MODE_DELAY > 0:
+        import time
+
+        time.sleep(SLOW_MODE_DELAY)
 
     # Process the image by overlaying a water bottle on top of the detected beer containers
     edited_image = water_bottle_processor.process(image, boxes)
 
     # Save the edited image back to Minio
-    minio.set_image(image_id, edited_image)
+    try:
+        minio.set_image(image_id, edited_image)
+    except:
+        print("ERROR: Could not save edited image to Minio")
+        return
 
     # Acknowledge the message and publish a task finish event
-    queue_connector.publish_task_finish_event(image_id, email)
+    try:
+        queue_connector.publish_task_finish_event(image_id, email)
+    except:
+        print("ERROR: Could not publish task finish event")
+        return
+
     ch.basic_ack(delivery_tag=method.delivery_tag)
 
 

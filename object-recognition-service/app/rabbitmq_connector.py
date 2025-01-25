@@ -24,7 +24,7 @@ class RabbitMQConnector:
     def register_callback(self, queue, callback):
         # Make sure the queue exists
         self.channel.queue_declare(queue=queue)
-        
+
         self.channel.basic_consume(
             queue=queue,
             on_message_callback=callback,
@@ -37,6 +37,7 @@ class RabbitMQConnector:
 
         # Publish the done event
         self.channel.basic_publish(
+            exchange="",
             routing_key=queue,
             body=json.dumps({"image_id": image_id, "email": email}),
         )
