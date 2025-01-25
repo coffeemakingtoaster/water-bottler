@@ -3,7 +3,7 @@
 
 ## Docker compose
 
-There is a small docker compose setup for the application. However development using docker compose should only be used when development using minikube is not possible.
+There is a small docker compose setup for the application. However, development using docker compose should only be used when development using minikube is not possible.
 
 ### Requirements
 
