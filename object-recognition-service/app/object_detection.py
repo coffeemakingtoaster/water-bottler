@@ -13,7 +13,6 @@ class BeerDetector:
         try:
             print("Initializing YOLO model...")
             model = YOLOWorld()
-            print("Ich vermute hier sein")
 
             classes = ["beer bottle", "beer can", "beer glass", "beer mug"]
             modifiers = ["", "partial visible", "blurry", "empty"]

@@ -18,8 +18,8 @@ class RabbitMQConnector:
             )
 
             self.channel = self.connection.channel()
-        except:
-            raise RuntimeError("Could not connect to RabbitMQ server")
+        except Exception as e:
+            raise RuntimeError(f"Could not connect to RabbitMQ server: {str(e)}")
 
     def register_callback(self, queue, callback):
         # Make sure the queue exists
