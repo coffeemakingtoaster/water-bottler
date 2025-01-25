@@ -26,6 +26,7 @@ You can now see the management dashboard at localhost:3111
 ## Example request
 
 ```sh
-curl -X POST -F image=@docker-compose.yaml -H "X-API-KEY: amVmZnMtd2F0ZXItYm90dGxlci1leGFtcGxlLWFwaS1rZXk=" localhost:8081/upload -s -o /dev/null -w "%{http_code}"```
+curl -X POST -F image=@docker-compose.yaml -H "X-API-KEY: amVmZnMtd2F0ZXItYm90dGxlci1leGFtcGxlLWFwaS1rZXk=" localhost:8081/upload -s -o /dev/null -w "%{http_code}"
+```
 
      Note: The file file uploaded as an image does not matter yet as we dont do anything with it for now. 
