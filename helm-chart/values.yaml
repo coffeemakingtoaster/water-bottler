@@ -38,6 +38,12 @@ downloadService:
   configuration:
     minioEndpoint: minio-service.{{ .Release.Namespace }}.svc.cluster.local:9000
 
+objectRecognitionService:
+  configuration:
+    queueHost: dev-cluster.{{ .Release.Namespace }}.svc.cluster.local
+    delay: 0
+
+
 # override for adapter
 prometheus-adapter:
   prometheus:
