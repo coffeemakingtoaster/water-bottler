@@ -5,7 +5,7 @@ from image_processing import WaterBottleImageProcessor
 from rabbitmq_connector import RabbitMQConnector
 from minio_connector import MinioConnector
 
-SLOW_MODE_DELAY = os.getenv("SLOW_MODE_DELAY", 0)
+SLOW_MODE_DELAY = int(os.getenv("SLOW_MODE_DELAY", 0))
 
 
 def onImageEventReceived(ch, method, properties, body):
