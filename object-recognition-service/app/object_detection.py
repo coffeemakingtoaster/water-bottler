@@ -25,7 +25,7 @@ class BeerDetector:
         except Exception as e:
             raise RuntimeError(f"Failed to initialize YOLO model: {str(e)}")
 
-    def predict(self, image_path: str) -> Tuple[ndarray, ndarray]:
+    def predict(self, image_path: str) -> ndarray:
         """
         Predicts the bounding boxes of potential beer containers in an image.
 
@@ -33,9 +33,7 @@ class BeerDetector:
             image_path (str): The path to the image file.
 
         Returns:
-            Tuple[ndarray, ndarray]: A tuple containing:
-                - The bounding box coordinates as numpy array of shape (n, 4) in [x1, y1, x2, y2] format
-                - The confidence scores as numpy array of shape (n,)
+            ndarray: The bounding box coordinates as numpy array of shape (n, 4) in [x1, y1, x2, y2] format
 
         Raises:
             FileNotFoundError: If the image file does not exist
@@ -54,6 +52,6 @@ class BeerDetector:
                 verbose=False,
             )
             boxes = result[0].boxes
-            return boxes.xyxy.cpu().numpy(), boxes.conf.cpu().numpy()
+            return boxes.xyxy.cpu().numpy()
         except Exception as e:
             raise RuntimeError(f"Failed to process image: {str(e)}")
