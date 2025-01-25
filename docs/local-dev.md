@@ -56,10 +56,13 @@ This publishes the version of your local services to the cluster. In some cases 
 
 ### Running the application
 
-Use helm: 
+Use helm (run this within the `helm-chart` directory): 
 
 ```sh
-helm install water-bottler ./helm-chart
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm dependency build
+helm install release-name .
 ```
 
 To get the adress of a service use:
