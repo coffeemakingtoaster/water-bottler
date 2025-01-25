@@ -9,7 +9,7 @@ def onImageEventReceived(ch, method, properties, body):
     # Read the payload
     payload = json.loads(body)
     image_id = payload["image_id"]
-    email = payload["email"]
+    email = payload["user_mail"]
 
     # Get the image from Minio
     image = minio.get_image(image)
