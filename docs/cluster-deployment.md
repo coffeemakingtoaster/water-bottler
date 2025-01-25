@@ -168,7 +168,7 @@ This is required to allow the pods to communicate with each other. If non is ins
 This setup uses flannel as the CNI plugin.
 
 ### Install flannel required binaries
-Install cni, the code snippet can be found in flannel's [readme](https://github.com/flannel-io/flannel/blob/master/README.md).
+To install cni, the code snippet can be found in flannel's [readme](https://github.com/flannel-io/flannel/blob/master/README.md).
 ```bash
 ARCH=$(uname -m)
   case $ARCH in
@@ -213,7 +213,7 @@ If you experience any issues with coreDNS e.g.
 ```bash
 kubectl logs --namespace=kube-system -l k8s-app=kube-dns
 
-[ERROR] plugin/errors: ... HINFO: read udp SERVIE_IP->DNS_IP: read: no route to host
+[ERROR] plugin/errors: ... HINFO: read udp SERVICE_IP->DNS_IP: read: no route to host
 ```
 
 Manually restart the rollout of the coreDNS pods[^1]
