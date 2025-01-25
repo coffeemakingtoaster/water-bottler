@@ -12,22 +12,19 @@ def onImageEventReceived(ch, method, properties, body):
     email = payload["user_mail"]
 
     # Get the image from Minio
-    image = minio.get_image(image)
+    image = minio.get_image(image_id)
 
     # Predict the bounding boxes of potential beer containers in the image
-    boxes, conf = beer_detection_model.predict(image)
-    high_conf_boxes = boxes[conf > 0.5]
+    boxes = beer_detection_model.predict(image)
 
     # Process the image by overlaying a water bottle on top of the detected beer containers
-    edited_image = water_bottle_processor.process(image, high_conf_boxes)
+    edited_image = water_bottle_processor.process(image, boxes)
 
     # Save the edited image back to Minio
     minio.set_image(image_id, edited_image)
 
-    # Publish a task finish event
+    # Acknowledge the message and publish a task finish event
     queue_connector.publish_task_finish_event(image_id, email)
-
-    # Acknowledge the message
     ch.basic_ack(delivery_tag=method.delivery_tag)
 
 
