@@ -4,9 +4,6 @@ import numpy as np
 from PIL import Image
 from typing import List
 
-IMAGE_SCALE_FACTOR = 1.5
-
-
 class WaterBottleImageProcessor:
     def __init__(self, water_bottle_path: str):
         if not os.path.exists(water_bottle_path):
@@ -18,22 +15,18 @@ class WaterBottleImageProcessor:
 
     def process(
         self,
-        image_path: str,
+        image: Image,
         box_coordinates: List[np.ndarray],
     ) -> Image.Image:
         """
         Overlays the water bottle image on top of given image at the provided box_coordinates.
 
         Args:
-            image (str): The path of the image to overlay the water bottle on.
+            image (Image): The image to overlay the water bottle on.
             box_coordinates (List[np.ndarray]): A list of numpy arrays containing the bounding box coordinates of the detected beer containers.
         """
-        # Check if image exists
-        if not os.path.exists(image_path):
-            raise FileNotFoundError(f"Image not found at {image_path}")
-
         # Read in the image as PIL Image
-        image = Image.open(image_path).convert("RGBA")
+        image = image.convert("RGBA")
 
         # Sort the bounding boxes by size
         # This is done to ensure that smaller bounding boxes are processed first
@@ -48,20 +41,23 @@ class WaterBottleImageProcessor:
             # Convert to integers
             x1, y1, x2, y2 = map(int, coords)
 
-            # Calculate the  width and height of the bounding box
+            # Calculate the width and height of the bounding box
             width = x2 - x1
             height = y2 - y1
 
             # Scaling the water bottle image to fit the bounding box
             # but keeping the aspect ratio
-            target_width = int(width * IMAGE_SCALE_FACTOR)
-            target_height = int(height * IMAGE_SCALE_FACTOR)
+            aspect_ratio_bottle = self.water_bottle.height / self.water_bottle.width
+            aspect_ratio_target = height / width
 
-            aspect_ratio = self.water_bottle.width / self.water_bottle.height
-            if target_width / target_height > aspect_ratio:
-                target_width = int(target_height * aspect_ratio)
+            if(aspect_ratio_bottle > aspect_ratio_target):
+                scale_factor = width / self.water_bottle.width
+                target_width = width
+                target_height = int(self.water_bottle.height * scale_factor)
             else:
-                target_height = int(target_width / aspect_ratio)
+                scale_factor = height / self.water_bottle.height
+                target_height = height
+                target_width = int(self.water_bottle.width * scale_factor)
 
             # Resize bottle to fit the bounding box
             resized_water_bottle = self.water_bottle.resize(
