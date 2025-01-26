@@ -7,3 +7,7 @@ Service for replacing alcoholic beverages in images with water bottles
 - [Local Development](./docs/local-dev.md)
 - [Cluster Deployment](./docs/cluster-deployment.md)
 
+## Additional
+
+- [Technical Rambling](./docs/technical-details.md)
+

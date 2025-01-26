@@ -1,0 +1,100 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/26.0.4 Chrome/128.0.6613.186 Electron/32.2.5 Safari/537.36" version="26.0.4">
+  <diagram name="Page-1" id="7RVEREy4isW54lbjeR9-">
+    <mxGraphModel dx="818" dy="506" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="crpvws2iouamjvHjmUin-9" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="50" y="80" width="520" height="390" as="geometry" />
+        </mxCell>
+        <mxCell id="crpvws2iouamjvHjmUin-1" value="" style="shape=image;verticalLabelPosition=bottom;labelBackgroundColor=default;verticalAlign=top;aspect=fixed;imageAspect=0;image=https://static-00.iconduck.com/assets.00/rabbitmq-icon-484x512-s9lfaapn.png;" vertex="1" parent="1">
+          <mxGeometry x="80" y="340" width="56.72" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="crpvws2iouamjvHjmUin-2" value="rabbitMQ&amp;nbsp;&lt;div&gt;Cluster&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="78" y="410" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="crpvws2iouamjvHjmUin-3" value="rabbitmq cluster service" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="200" y="355" width="120" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="crpvws2iouamjvHjmUin-4" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="crpvws2iouamjvHjmUin-1" target="crpvws2iouamjvHjmUin-3">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="400" y="480" as="sourcePoint" />
+            <mxPoint x="450" y="430" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="crpvws2iouamjvHjmUin-5" value="" style="shape=image;verticalLabelPosition=bottom;labelBackgroundColor=default;verticalAlign=top;aspect=fixed;imageAspect=0;image=https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/Prometheus_software_logo.svg/1200px-Prometheus_software_logo.svg.png;" vertex="1" parent="1">
+          <mxGeometry x="229.75" y="220" width="60.5" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="crpvws2iouamjvHjmUin-6" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="crpvws2iouamjvHjmUin-5" target="crpvws2iouamjvHjmUin-3">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="400" y="240" as="sourcePoint" />
+            <mxPoint x="450" y="190" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="crpvws2iouamjvHjmUin-7" value="scrapes" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="260" y="300" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="crpvws2iouamjvHjmUin-8" value="exposes to" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="136.72" y="340" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="crpvws2iouamjvHjmUin-10" value="Control Plane" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="240" y="60" width="120" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="crpvws2iouamjvHjmUin-12" value="Adapter" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="226.5" y="170" width="67" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="crpvws2iouamjvHjmUin-13" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="crpvws2iouamjvHjmUin-5" target="crpvws2iouamjvHjmUin-12">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="400" y="180" as="sourcePoint" />
+            <mxPoint x="450" y="130" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="crpvws2iouamjvHjmUin-14" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.167;entryY=1.02;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="crpvws2iouamjvHjmUin-12" target="crpvws2iouamjvHjmUin-10">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="400" y="180" as="sourcePoint" />
+            <mxPoint x="450" y="130" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="crpvws2iouamjvHjmUin-15" value="HPA" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="400" y="170" width="80" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="crpvws2iouamjvHjmUin-16" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=1;entryY=0.75;entryDx=0;entryDy=0;" edge="1" parent="1" source="crpvws2iouamjvHjmUin-15" target="crpvws2iouamjvHjmUin-10">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="400" y="180" as="sourcePoint" />
+            <mxPoint x="450" y="130" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="440" y="98" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="crpvws2iouamjvHjmUin-17" value="" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+          <mxGeometry x="402.5" y="270" width="40" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="crpvws2iouamjvHjmUin-19" value="" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+          <mxGeometry x="417.5" y="270" width="40" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="crpvws2iouamjvHjmUin-20" value="" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+          <mxGeometry x="437.5" y="270" width="40" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="crpvws2iouamjvHjmUin-23" value="Object Recognition Service" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="402.5" y="315" width="72.5" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="crpvws2iouamjvHjmUin-24" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.598;entryY=-0.029;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="crpvws2iouamjvHjmUin-15" target="crpvws2iouamjvHjmUin-19">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="crpvws2iouamjvHjmUin-25" value="Scales" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="442.5" y="210" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="crpvws2iouamjvHjmUin-26" value="scrapes" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="442.5" y="120" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="crpvws2iouamjvHjmUin-27" value="publishes&lt;div&gt;Metrics&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="196.72" y="120" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="crpvws2iouamjvHjmUin-28" value="" style="shape=image;verticalLabelPosition=bottom;labelBackgroundColor=default;verticalAlign=top;aspect=fixed;imageAspect=0;image=https://sue.eu/wp-content/uploads/sites/6/2022/06/kubernetes-logo-920x920-sue-v0.png;" vertex="1" parent="1">
+          <mxGeometry x="273.75" y="7.5" width="52.5" height="52.5" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
