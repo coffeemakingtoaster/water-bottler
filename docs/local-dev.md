@@ -61,12 +61,25 @@ Use helm (run this within the `helm-chart` directory):
 ```sh
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 helm dependency build
 helm install release-name .
 ```
+
+For details on the helm chart see the respective [readme](../helm-chart/README.md).
 
 To get the adress of a service use:
 ```sh
 # for upload service
 minikube service upload-service --url 
 ```
+To use ingress instead of the service forwarding (for this the ingress has to be enabled in the values.yaml). Then the minikube plugin has to be used:
+```sh
+minikube addons enable ingress
+# Validate the ingress works as intended
+curl --resolve "smtp4dev.water-bottler.local:80:$( minikube ip )" -i http://smtp4dev.water-bottler.local:80/
+# Upload an image using the ingress
+curl -X POST -F image=@<image path here> -H "X-API-KEY: amVmZnMtd2F0ZXItYm90dGxlci1leGFtcGxlLWFwaS1rZXk=" --resolve "upload.water-bottler.local:80:$( minikube ip )" upload.water-bottler.local/upload -s -o /dev/null -w "%{http_code}"
+```
+
+For further info on ingresses in minikube see the [docs](https://kubernetes.io/docs/tasks/access-application-cluster/ingress-minikube/).
