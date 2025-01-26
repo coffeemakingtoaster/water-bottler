@@ -42,3 +42,30 @@ spec:
     protocol: TCP
   selector:
     run: download-service
+
+
+{{ if .Values.enableIngress }}
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: download-ingress
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: download.water-bottler.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: download-service
+                port:
+                  number: 8080
+
+{{ end }}
+
+

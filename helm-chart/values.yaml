@@ -2,6 +2,8 @@ globalImageTag: local
 
 enableSMTPDev: true
 
+enableIngress: true
+
 apiKeys:
   - name: "jeff@water-bottler.local"
     key: "amVmZnMtd2F0ZXItYm90dGxlci1leGFtcGxlLWFwaS1rZXk="
@@ -22,7 +24,7 @@ rabbitmq:
 uploadService:
   configuration:
     authServiceURL: http://authentication-service.{{ .Release.Namespace }}.svc.cluster.local:8080
-    queueURL: amqp://{{ .Values.minio.accessKey }}:{{ .Values.minio.accessKeySecret }}@dev-cluster.{{ .Release.Namespace }}.svc.cluster.local:5672
+    queueURL: amqp://{{ .Values.rabbitmq.username }}:{{ .Values.rabbitmq.password }}@dev-cluster.{{ .Release.Namespace }}.svc.cluster.local:5672
     minioEndpoint: minio-service.{{ .Release.Namespace }}.svc.cluster.local:9000
 
 notificationService:
@@ -30,7 +32,7 @@ notificationService:
     smtpServerURL: 
     smtpAuthUsername:
     smtpAuthPassword:
-    queueURL: amqp://{{ .Values.minio.accessKey }}:{{ .Values.minio.accessKeySecret }}@dev-cluster.{{ .Release.Namespace }}.svc.cluster.local:5672
+    queueURL: amqp://{{ .Values.rabbitmq.username }}:{{ .Values.rabbitmq.password }}@dev-cluster.{{ .Release.Namespace }}.svc.cluster.local:5672
     # This assumes a port forward of the download service to port 8083
     sourceURI: http://localhost:8083
 
@@ -39,6 +41,11 @@ downloadService:
     minioEndpoint: minio-service.{{ .Release.Namespace }}.svc.cluster.local:9000
 
 objectRecognitionService:
+  scaling:
+    minInstances: 1
+    maxInstances: 5
+    # This value is super low for testing purposes
+    scalingMetricThreshhold: 1
   configuration:
     queueHost: dev-cluster.{{ .Release.Namespace }}.svc.cluster.local
     delay: 0
