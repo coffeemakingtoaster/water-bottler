@@ -41,7 +41,7 @@ notificationService:
   configuration:
     # This is automagically set to the smtp dev instance if that one is enabled
     smtpServerURL: 
-    # Setting smpt auth REQUIRES an ssl connection to the smtp server
+    # Setting smpt auth REQUIRES an ssl connection to the smtp sehttps://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack/templates/_helpers.tpl#L8rver
     smtpAuthUsername:
     smtpAuthPassword:
     queueURL: amqp://{{ .Values.rabbitmq.username }}:{{ .Values.rabbitmq.password }}@water-bottler-cluster.{{ .Release.Namespace }}.svc.cluster.local:5672
@@ -70,8 +70,10 @@ objectRecognitionService:
 # override for adapter
 prometheus-adapter:
   prometheus:
-    # TODO: This could lead to issues, maybe?
-    url: http://prometheus-stack-kube-prom-prometheus.default.svc.cluster.local
+    # Trunacation magic to satisfy k8s dns spec
+    # See also: https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack/templates/_helpers.tpl#L8
+    # TODO: Try this with a variety of release names to ensure this works as intended!
+    url: http://{{ printf "%s-%s" .Release.Name "kube-prometheus" | trunc 26 | trimSuffix "-" }}-prometheus.{{ .Release.Namespace }}.svc.cluster.local
     port: 9090
     path: ""
 
@@ -81,13 +83,13 @@ prometheus-adapter:
     default: true
 
     custom: 
-    - seriesQuery: 'rabbitmq_queue_messages_ready{container="rabbitmq"}'
+    - seriesQuery: 'rabbitmq_queue_messages_unacked{container="rabbitmq"}'
       resources:
         overrides:
           namespace: {resource: "namespace"}
           pod: {resource: "pod"}
       name:
-        matches: "^(.*)_ready$"
+        matches: "^(.*)_unacked$"
         as: "${1}"
       metricsQuery: 'avg_over_time(<<.Series>>[5m])'
 

@@ -2,9 +2,9 @@ apiVersion: rabbitmq.com/v1beta1
 kind: RabbitmqCluster
 metadata:
   name: water-bottler-cluster
-  namespace: default
+  namespace: {{ .Release.Namespace }}
   labels:
-    release: prometheus-stack
+    release: {{ .Release.Name }}
 spec:
   override:
     service:
@@ -23,7 +23,8 @@ kind: ServiceMonitor
 metadata:
   name: rabbitmq
   labels:
-    release: prometheus-stack
+    # This (obviously) is implied. I still leave it here to warn anyone: Remove this and autoscaling breaks
+    release: {{ .Release.Name }}
 spec:
   endpoints:
   - port: prometheus
@@ -69,16 +70,16 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: adapter-config
-  namespace: default
+  namespace: {{ .Release.Namespace }}
 data:
   config.yaml: |-
     "rules":
     - "seriesQuery": |
-         'rabbitmq_queue_messages_ready{container="rabbitmq"}'
+         'rabbitmq_queue_messages_unacked{container="rabbitmq"}'
       "resources":
         "template": "<<.Resource>>"
       "name":
-        "matches": "^(.*)_ready"
+        "matches": "^(.*)_unacked"
         "as": "image_queue_workload"
       "metricsQuery": |
           avg_over_time (

@@ -53,7 +53,7 @@ spec:
   - type: Object
     object:
       metric: 
-        name: rabbitmq_queue_messages_ready
+        name: rabbitmq_queue_messages_unacked
       describedObject:
         apiVersion: v1
         kind: Service
