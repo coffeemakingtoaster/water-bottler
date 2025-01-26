@@ -1,9 +1,15 @@
+# Image tag to use for all water-bottler images
 globalImageTag: local
 
+# Enable smtp server within the cluster.
+# Mainly for testing use 
 enableSMTPDev: true
 
-enableIngress: true
+# Enable ingress 
+enableIngress: false
 
+# Set valid api keys
+# Api keys must be base64 encoded
 apiKeys:
   - name: "jeff@water-bottler.local"
     key: "amVmZnMtd2F0ZXItYm90dGxlci1leGFtcGxlLWFwaS1rZXk="
@@ -12,34 +18,43 @@ apiKeys:
     key: "ZW1hw7F1ZWwtd2F0ZXItYm90dGxlci1leGFtcGxlLWFwaS1rZXk="
     validUntil: "1982-01-01T00:00:00Z"
 
+# Set properties for minio
 minio:
   accessKey: water
   accessKeySecret: bottler123
   bucketName: water-buckid
 
+# Set properties for rabbitmq
 rabbitmq:
   password: bottler
   username: water
 
+# Configure upload service
 uploadService:
   configuration:
     authServiceURL: http://authentication-service.{{ .Release.Namespace }}.svc.cluster.local:8080
-    queueURL: amqp://{{ .Values.rabbitmq.username }}:{{ .Values.rabbitmq.password }}@dev-cluster.{{ .Release.Namespace }}.svc.cluster.local:5672
+    queueURL: amqp://{{ .Values.rabbitmq.username }}:{{ .Values.rabbitmq.password }}@water-bottler-cluster.{{ .Release.Namespace }}.svc.cluster.local:5672
     minioEndpoint: minio-service.{{ .Release.Namespace }}.svc.cluster.local:9000
 
+# Configure notification service
 notificationService:
   configuration:
+    # This is automagically set to the smtp dev instance if that one is enabled
     smtpServerURL: 
+    # Setting smpt auth REQUIRES an ssl connection to the smtp server
     smtpAuthUsername:
     smtpAuthPassword:
-    queueURL: amqp://{{ .Values.rabbitmq.username }}:{{ .Values.rabbitmq.password }}@dev-cluster.{{ .Release.Namespace }}.svc.cluster.local:5672
+    queueURL: amqp://{{ .Values.rabbitmq.username }}:{{ .Values.rabbitmq.password }}@water-bottler-cluster.{{ .Release.Namespace }}.svc.cluster.local:5672
     # This assumes a port forward of the download service to port 8083
+    # Update this to your domain for production, as this adress is used in the emails we send out
     sourceURI: http://localhost:8083
 
+# Configure download service
 downloadService:
   configuration:
     minioEndpoint: minio-service.{{ .Release.Namespace }}.svc.cluster.local:9000
 
+# Configure object recognition service
 objectRecognitionService:
   scaling:
     minInstances: 1
@@ -47,9 +62,10 @@ objectRecognitionService:
     # This value is super low for testing purposes
     scalingMetricThreshhold: 1
   configuration:
-    queueHost: dev-cluster.{{ .Release.Namespace }}.svc.cluster.local
+    queueHost: water-bottler-cluster.{{ .Release.Namespace }}.svc.cluster.local
+    # This slows down the processing of images
+    # Mainly useful for demonstrating the autoscale feature
     delay: 0
-
 
 # override for adapter
 prometheus-adapter:

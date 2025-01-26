@@ -34,6 +34,11 @@ Remove from cluster
 helm uninstall <release name>
 ```
 
+### Configuration
+
+Use [overrides](https://helm.sh/docs/chart_template_guide/values_files/) to set values for the install.
+For details on what can be configured, check the `values.yaml`.
+
 ### Known issues
 
 Sometimes the rabbitmq does not seem to terminate properly after uninstalling.

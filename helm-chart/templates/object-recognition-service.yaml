@@ -58,7 +58,7 @@ spec:
         apiVersion: v1
         kind: Service
         # point to rabbitmq service
-        name: dev-cluster
+        name: water-bottler-cluster
       target:
         type: Value
         value: {{ .Values.objectRecognitionService.scaling.scalingMetricThreshhold }}
