@@ -1,7 +1,7 @@
 apiVersion: rabbitmq.com/v1beta1
 kind: RabbitmqCluster
 metadata:
-  name: dev-cluster
+  name: water-bottler-cluster
   namespace: default
   labels:
     release: prometheus-stack

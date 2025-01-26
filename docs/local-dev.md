@@ -73,6 +73,10 @@ To get the adress of a service use:
 # for upload service
 minikube service upload-service --url 
 ```
+
+<details>
+<summary> Ingress usage </summary>
+
 To use ingress instead of the service forwarding (for this the ingress has to be enabled in the values.yaml). Then the minikube plugin has to be used:
 ```sh
 minikube addons enable ingress
@@ -83,3 +87,28 @@ curl -X POST -F image=@<image path here> -H "X-API-KEY: amVmZnMtd2F0ZXItYm90dGxl
 ```
 
 For further info on ingresses in minikube see the [docs](https://kubernetes.io/docs/tasks/access-application-cluster/ingress-minikube/).
+</details>
+
+### Using the application
+
+To upload an image an API request has to be send to the upload service.
+After processing the image can be downloaded from the download service using the url received via email.
+In a local development environment the steps are the following:
+
+1. Ensure that port forwarding is set up. We will use port mapping equal to the docker compose stack:
+```sh
+kubectl port-forward service/upload-service 8081:8080 &
+kubectl port-forward service/download-service 8083:8080 &
+kubectl port-forward service/smtp4dev 80:80 &
+```
+
+2. Send an image of your choice to upload service (port 8081). There are some example images in the `object-recognition-service/example-data/example-images/`  directory:
+
+```sh
+curl -X POST -F image=@<image path here> -H "X-API-KEY: amVmZnMtd2F0ZXItYm90dGxlci1leGFtcGxlLWFwaS1rZXk=" localhost:8081/upload -s -o /dev/null -w "%{http_code}"
+# Should return 202
+```
+
+3. Wait for email to be send to smtp4dev. Just check the [email inbox](http://localhost:80) in you browser. You should receive an 'You Image is ready' email shortly.
+
+4. Go to the link within the email and receiver your processed image! (The link should look similar to this one `http://localhost:8083/download?file=`)
