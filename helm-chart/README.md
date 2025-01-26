@@ -9,6 +9,8 @@ Alternatively there are `latest` packages on github.
 
     NOTE: These are not supported for arm because the github arm runners take about 10x the time to build arm docker images and we have limited runner minutes :)
 
+Several deployments expect the cluster to support persisitent volume (claims). We use the default storage class of the cluster. If there is no storage class installed on the cluster/no default storage class we recommend [OpenEBS Local PV](https://openebs.io/docs/quickstart-guide/installation). This is NOT part of the helm chart because installing random storage classes without understanding what they do/how they work could cause harm to you k8s setup!
+
 ```sh
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
@@ -31,3 +33,8 @@ Remove from cluster
 ```sh
 helm uninstall <release name>
 ```
+
+### Known issues
+
+Sometimes the rabbitmq does not seem to terminate properly after uninstalling.
+In this case: Reinstall the helm chart -> uninstall it again.
