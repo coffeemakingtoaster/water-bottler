@@ -64,7 +64,7 @@ if __name__ == "__main__":
 
     # Setup Image processing classes
     beer_detection_model = BeerDetector()
-    water_bottle_processor = WaterBottleImageProcessor("water_bottle.png")
+    water_bottle_processor = WaterBottleImageProcessor("water_bottle.png", "water_glass.png")
 
     # Setup Minio connection
     minio = MinioConnector()
