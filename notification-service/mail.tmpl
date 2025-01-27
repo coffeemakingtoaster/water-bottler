@@ -1,12 +1,12 @@
 From: the name {{.From}}
-To: {{.Email}}
+To: {{ .Data.UserEmail}}
 Subject: Your image is ready!
 
 Dear User,
 
 your image can now be downloaded at:
 
-{{.SourceUri}}/download?file={{.ImageId}}
+{{.SourceUri}}/download?file={{.Data.ImageId}}
 
 All the best,
 Water Bottler

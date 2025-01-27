@@ -2,13 +2,11 @@ package main
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"html/template"
 	"io"
 	"net/http"
 	"net/smtp"
-	"net/url"
 	"os"
 	"strings"
 
@@ -23,9 +21,8 @@ var SMTP_SERVER_PASSWORD string
 
 var MAIL_TEMPLATE *template.Template
 
-type MailRequestData struct {
-	Email     string `json:"email"`
-	ImageId   string `json:"imageid"`
+type MailTemplateData struct {
+	Data      queueconnector.FinishedJob
 	From      string
 	SourceUri string
 }
@@ -35,38 +32,40 @@ func getHealth(w http.ResponseWriter, r *http.Request) {
 	io.WriteString(w, "ok")
 }
 
-func sendMail(w http.ResponseWriter, r *http.Request) {
-	var requestData MailRequestData
+func sendMail(job queueconnector.FinishedJob) bool {
 
-	err := json.NewDecoder(r.Body).Decode(&requestData)
-	if err != nil {
-		log.Debug().Msgf("Could not decode body due to an error: %s", err.Error())
-		w.WriteHeader(http.StatusBadRequest)
-		return
+	if len(job.UserEmail) == 0 || len(job.ImageId) == 0 {
+		log.Warn().Msg("Received faulty job entity")
+		return false
 	}
 
-	requestData.From = "notification@water-bottler.com"
-	requestData.SourceUri = os.Getenv("SOURCE_URI")
+	templateData := MailTemplateData{
+		Data:      job,
+		From:      "notification@water-bottler.com",
+		SourceUri: os.Getenv("SOURCE_URI"),
+	}
 
 	var message bytes.Buffer
 
-	MAIL_TEMPLATE.Execute(&message, requestData)
+	MAIL_TEMPLATE.Execute(&message, templateData)
+
+	var err error
 
 	if SMTP_SERVER_PASSWORD != "" && SMTP_SERVER_USERNAME != "" {
 		// For basicauth the smtp server url cannot contain port
 		cleanURL := strings.Split(SMTP_SERVER_URL, ":")
 		auth := smtp.PlainAuth("water-bottler-mail", SMTP_SERVER_USERNAME, SMTP_SERVER_PASSWORD, cleanURL[0])
-		err = smtp.SendMail(SMTP_SERVER_URL, auth, requestData.From, []string{requestData.Email}, message.Bytes())
+		err = smtp.SendMail(SMTP_SERVER_URL, auth, templateData.From, []string{templateData.Data.UserEmail}, message.Bytes())
 	} else {
-		err = smtp.SendMail(SMTP_SERVER_URL, nil, requestData.From, []string{requestData.Email}, message.Bytes())
+		err = smtp.SendMail(SMTP_SERVER_URL, nil, templateData.From, []string{templateData.Data.UserEmail}, message.Bytes())
 	}
 
 	if err != nil {
 		log.Warn().Msgf("Could not send mail due to an error: %s", err.Error())
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+		return false
 	}
 	log.Debug().Msg("Email Sent Successfully!")
+	return true
 }
 
 func jobConsumer(queueConnectionString string) {
@@ -84,18 +83,7 @@ func jobConsumer(queueConnectionString string) {
 
 	for job := range finishedJobs {
 		log.Debug().Msgf("Received job: %v", job)
-
-		// Send mail to user
-		var requestData MailRequestData
-		requestData.Email = job.UserEmail
-		requestData.ImageId = job.ImageId
-
-		req := http.Request{
-			Method: "POST",
-			URL:    &url.URL{Path: "/send-mail"},
-			Body:   io.NopCloser(strings.NewReader(fmt.Sprintf(`{"email": "%s", "imageid": "%s"}`, requestData.Email, requestData.ImageId))),
-		}
-		sendMail(nil, &req)
+		sendMail(job)
 	}
 }
 
@@ -124,7 +112,6 @@ func main() {
 	go jobConsumer(os.Getenv("QUEUE_URL"))
 
 	http.HandleFunc("/health", getHealth)
-	http.HandleFunc("/send-mail", sendMail)
 	addr := fmt.Sprintf("%s:%d", interfaceIP, interfacePort)
 	log.Info().Msgf("Starting notification service on %s", addr)
 	err = http.ListenAndServe(addr, nil)
