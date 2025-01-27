@@ -30,11 +30,11 @@ spec:
         - name: MINIO_BUCKET
           value: {{ .Values.minio.bucketName }}
         - name: QUEUE_INPUT_NAME
-          value: image-workload
+          value: "image-workload"
         - name: QUEUE_OUTPUT_NAME
-          value: finished-jobs
+          value: "finished-jobs"
         - name: SLOW_MODE_DELAY
-          value: {{ .Values.objectRecognitionService.configuration.delay }}
+          value: {{ quote .Values.objectRecognitionService.configuration.delay }}
 
 ---
 
@@ -47,20 +47,18 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: object-recognition-service
-  minReplicas: 1
-  maxReplicas: 5
+  minReplicas: {{ .Values.objectRecognitionService.scaling.minInstances }}
+  maxReplicas: {{ .Values.objectRecognitionService.scaling.maxInstances }}
   metrics:
   - type: Object
     object:
       metric: 
-        name: rabbitmq_queue_messages_ready
+        name: rabbitmq_queue_messages_unacked
       describedObject:
         apiVersion: v1
         kind: Service
         # point to rabbitmq service
-        name: dev-cluster
+        name: water-bottler-cluster
       target:
         type: Value
-        # For every one message in the queue one instance of the object recognition service is started
-        # This value is super low for testing purposes
-        value: 1
+        value: {{ .Values.objectRecognitionService.scaling.scalingMetricThreshhold }}

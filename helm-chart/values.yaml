@@ -1,7 +1,15 @@
+# Image tag to use for all water-bottler images
 globalImageTag: local
 
+# Enable smtp server within the cluster.
+# Mainly for testing use 
 enableSMTPDev: true
 
+# Enable ingress 
+enableIngress: false
+
+# Set valid api keys
+# Api keys must be base64 encoded
 apiKeys:
   - name: "jeff@water-bottler.local"
     key: "amVmZnMtd2F0ZXItYm90dGxlci1leGFtcGxlLWFwaS1rZXk="
@@ -10,45 +18,62 @@ apiKeys:
     key: "ZW1hw7F1ZWwtd2F0ZXItYm90dGxlci1leGFtcGxlLWFwaS1rZXk="
     validUntil: "1982-01-01T00:00:00Z"
 
+# Set properties for minio
 minio:
   accessKey: water
   accessKeySecret: bottler123
   bucketName: water-buckid
 
+# Set properties for rabbitmq
 rabbitmq:
   password: bottler
   username: water
 
+# Configure upload service
 uploadService:
   configuration:
     authServiceURL: http://authentication-service.{{ .Release.Namespace }}.svc.cluster.local:8080
-    queueURL: amqp://{{ .Values.minio.accessKey }}:{{ .Values.minio.accessKeySecret }}@dev-cluster.{{ .Release.Namespace }}.svc.cluster.local:5672
+    queueURL: amqp://{{ .Values.rabbitmq.username }}:{{ .Values.rabbitmq.password }}@water-bottler-cluster.{{ .Release.Namespace }}.svc.cluster.local:5672
     minioEndpoint: minio-service.{{ .Release.Namespace }}.svc.cluster.local:9000
 
+# Configure notification service
 notificationService:
   configuration:
+    # This is automagically set to the smtp dev instance if that one is enabled
     smtpServerURL: 
+    # Setting smpt auth REQUIRES an ssl connection to the smtp sehttps://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack/templates/_helpers.tpl#L8rver
     smtpAuthUsername:
     smtpAuthPassword:
-    queueURL: amqp://{{ .Values.minio.accessKey }}:{{ .Values.minio.accessKeySecret }}@dev-cluster.{{ .Release.Namespace }}.svc.cluster.local:5672
+    queueURL: amqp://{{ .Values.rabbitmq.username }}:{{ .Values.rabbitmq.password }}@water-bottler-cluster.{{ .Release.Namespace }}.svc.cluster.local:5672
     # This assumes a port forward of the download service to port 8083
+    # Update this to your domain for production, as this adress is used in the emails we send out
     sourceURI: http://localhost:8083
 
+# Configure download service
 downloadService:
   configuration:
     minioEndpoint: minio-service.{{ .Release.Namespace }}.svc.cluster.local:9000
 
+# Configure object recognition service
 objectRecognitionService:
+  scaling:
+    minInstances: 1
+    maxInstances: 5
+    # This value is super low for testing purposes
+    scalingMetricThreshhold: 1
   configuration:
-    queueHost: dev-cluster.{{ .Release.Namespace }}.svc.cluster.local
+    queueHost: water-bottler-cluster.{{ .Release.Namespace }}.svc.cluster.local
+    # This slows down the processing of images
+    # Mainly useful for demonstrating the autoscale feature
     delay: 0
-
 
 # override for adapter
 prometheus-adapter:
   prometheus:
-    # TODO: This could lead to issues, maybe?
-    url: http://prometheus-stack-kube-prom-prometheus.default.svc.cluster.local
+    # Trunacation magic to satisfy k8s dns spec
+    # See also: https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack/templates/_helpers.tpl#L8
+    # TODO: Try this with a variety of release names to ensure this works as intended!
+    url: http://{{ printf "%s-%s" .Release.Name "kube-prometheus" | trunc 26 | trimSuffix "-" }}-prometheus.{{ .Release.Namespace }}.svc.cluster.local
     port: 9090
     path: ""
 
@@ -58,13 +83,13 @@ prometheus-adapter:
     default: true
 
     custom: 
-    - seriesQuery: 'rabbitmq_queue_messages_ready{container="rabbitmq"}'
+    - seriesQuery: 'rabbitmq_queue_messages_unacked{container="rabbitmq"}'
       resources:
         overrides:
           namespace: {resource: "namespace"}
           pod: {resource: "pod"}
       name:
-        matches: "^(.*)_ready$"
+        matches: "^(.*)_unacked$"
         as: "${1}"
       metricsQuery: 'avg_over_time(<<.Series>>[5m])'
 
