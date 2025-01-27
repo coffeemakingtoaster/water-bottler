@@ -13,6 +13,35 @@ on:
       - object-recognition-service/**
 
 jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r object-recognition-service/requirements.txt
+
+      - name: Run unittests
+        working-directory: object-recognition-service
+        run: |
+          python -m unittest discover -s tests -p "*.py"
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: object-recognition-service/test-results.xml
   docker-build:
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }} # Only run on push to main
     uses: ./.github/workflows/docker-build-and-push.template.yml
