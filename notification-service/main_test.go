@@ -1,13 +1,9 @@
 package main
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"html/template"
-	"net/http"
-	"net/http/httptest"
 	"strings"
 	"testing"
 
@@ -22,17 +18,12 @@ type sendMailRequestBody struct {
 	ImageId string `json:"imageid"`
 }
 
-func getRequestWithJsonBody(body sendMailRequestBody) *http.Request {
-	parsedBody, _ := json.Marshal(&body)
-	return httptest.NewRequest("POST", "/send-mail", bytes.NewReader(parsedBody))
-}
-
 func setupTemplate() {
 	MAIL_TEMPLATE, _ = template.New("Test Template").Parse("From: {{.From}}\r\n" +
-		"To: {{.Email}}\r\n" +
+		"To: {{.Data.UserEmail}}\r\n" +
 		"Subject: Testing!\r\n" +
 		"\r\n" +
-		"{{.ImageId}}\r\n")
+		"{{.Data.ImageId}}\r\n")
 }
 
 func setupMockSmtpServer() *smtpmock.Server {
@@ -58,14 +49,13 @@ func Test_successfulSmtpSend(t *testing.T) {
 	defer gracefullyShutdownSMTPSever(s)
 
 	setupTemplate()
-	w := httptest.NewRecorder()
 
 	expectedMail := fmt.Sprintf("%s@testing.test", uuid.New().String())
 	expectedImageId := uuid.New().String()
 
 	SMTP_SERVER_URL = fmt.Sprintf("localhost:%d", s.PortNumber())
 
-	sendMail(w, getRequestWithJsonBody(sendMailRequestBody{Email: expectedMail, ImageId: expectedImageId}))
+	sendMail(queueconnector.FinishedJob{UserEmail: expectedMail, ImageId: expectedImageId})
 
 	msgs := s.MessagesAndPurge()
 
@@ -89,27 +79,24 @@ func Test_successfulSmtpSend(t *testing.T) {
 func Test_smtpServerNotReachable(t *testing.T) {
 	setupTemplate()
 
-	w := httptest.NewRecorder()
-
 	SMTP_SERVER_URL = fmt.Sprintf("localhost:1234")
 
-	sendMail(w, getRequestWithJsonBody(sendMailRequestBody{Email: "test@test.test", ImageId: "testing"}))
+	success := sendMail(queueconnector.FinishedJob{UserEmail: "test@test.test", ImageId: "testing"})
 
-	if w.Result().StatusCode != http.StatusInternalServerError {
-		t.Errorf("Expected statuscode %d but received %d", http.StatusInternalServerError, w.Result().StatusCode)
+	if success {
+		t.Error("Expected failure but succeeded")
 	}
 }
 
 func Test_sendMailNoBody(t *testing.T) {
 	setupTemplate()
-	w := httptest.NewRecorder()
 
 	SMTP_SERVER_URL = fmt.Sprintf("localhost:1234")
 
-	sendMail(w, httptest.NewRequest("POST", "/send-mail", nil))
+	success := sendMail(queueconnector.FinishedJob{})
 
-	if w.Result().StatusCode != http.StatusBadRequest {
-		t.Errorf("Expected statuscode %d but received %d", http.StatusBadRequest, w.Result().StatusCode)
+	if success {
+		t.Error("Expected failure but succeeded")
 	}
 }
 
