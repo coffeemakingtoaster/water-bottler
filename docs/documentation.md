@@ -13,7 +13,7 @@ There is a simple docker compose setup for the application. However, development
 #### Running the application
 
 ```sh
-  docker compose up -d
+    docker compose up -d
 ```
 
 This should start all services. Relevant ports are:
@@ -38,7 +38,7 @@ To enable local development that already takes the k8s deployment into considera
 Start your local cluster using minikube:
 
 ```sh
-  minikube start 
+    minikube start 
 ```
     Optionally you can specify the resource amount the cluster should use. 
     Use `minikube start --help` for more information.
@@ -46,7 +46,7 @@ Start your local cluster using minikube:
 Build all images of local services into the cluster using the script:
 
 ```sh
-  sh ./build-all-local.sh
+    sh ./build-all-local.sh
 ```
 
 This publishes the version of your local services to the cluster. However, in some cases this may not be needed i.e. if you want to use the image versions published to ghcr.
@@ -176,7 +176,7 @@ Apply the sysctl configuration.
 
 #### Install containerd
 ```bash
-  apt -y install containerd
+    apt -y install containerd
 ```
 
 ##### Enable cgroups
@@ -189,12 +189,12 @@ First load the extended default configuration of containerd, then change the `Sy
 
 Restart containerd to reload the config
 ```bash
-  systemctl restart containerd
+    systemctl restart containerd
 ```
 
 #### Install kubernetes relevant binaries
 ```bash
-  apt-get install -y apt-transport-https ca-certificates curl gnupg
+    apt-get install -y apt-transport-https ca-certificates curl gnupg
 ```
 
 ##### Import kubernetes key
@@ -208,29 +208,29 @@ Restart containerd to reload the config
 
 ##### Install kubernetes binaires
 ```bash
-  apt-get install -y kubelet kubeadm kubectl
+    apt-get install -y kubelet kubeadm kubectl
 ```
 
 ##### Enable kubelet
 ```bash
-  systemctl enable --now kubelet
+    systemctl enable --now kubelet
 ```
 
 ###### Optional: Pre-pull the kubernetes images
 ```bash
-  kubeadm config images pull
+    kubeadm config images pull
 ```
 
 ##### Test if a cluster could be initialized
 ```bash 
-  kubeadm init --dry-run
+    kubeadm init --dry-run
 ```
 
 ### 2.2 Initialize the master node
 
 #### Get the default K8s config
 ```bash
-  kubeadm config print init-defaults > kubeadm-config.yaml
+    kubeadm config print init-defaults > kubeadm-config.yaml
 ```
 
 Edit the `kubeadm-config.yaml` to match the network setup.
@@ -255,7 +255,7 @@ networking:
 
 Initialize the master node with the edited configuration.
 ```bash
-  kubeadm init --config /root/kubeadm-config.yaml
+    kubeadm init --config /root/kubeadm-config.yaml
 ```
 
 #### Install networking and network policy
@@ -280,7 +280,7 @@ To install cni, the code snippet can be found in flannel's [readme](https://gith
 
 ##### Get the flannel configuration
 ```bash
-  wget https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml
+    wget https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml
 ```
 
 Edit the flannel configuration to match the network setup.
@@ -299,7 +299,7 @@ data:
 
 Apply the flannel configuration.
 ```bash
-  kubectl apply ./kube-flannel.yml
+    kubectl apply ./kube-flannel.yml
 ```
 
 A healthy cluster should show the following output.
@@ -327,16 +327,8 @@ If you experience any issues with coreDNS e.g.
 
 Manually restart the rollout of the coreDNS pods[^1]
 ```bash
-  kubectl -n kube-system rollout restart deployment coredns
+    kubectl -n kube-system rollout restart deployment coredns
 ```
-
----
-Sources:
-- https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/
-- https://www.cherryservers.com/blog/deploy-kubernetes-on-bare-metal
-
-[^1]: kubernetes-pods-cant-resolve-hostnames, https://stackoverflow.com/questions/45805483/kubernetes-pods-cant-resolve-hostnames
-
 
 ## 3. Technical Details
 
