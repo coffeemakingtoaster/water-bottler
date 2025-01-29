@@ -5,13 +5,18 @@ from PIL import Image
 from typing import List
 
 class WaterBottleImageProcessor:
-    def __init__(self, water_bottle_path: str):
+    def __init__(self, water_bottle_path: str, water_glass_path: str):
         if not os.path.exists(water_bottle_path):
             raise FileNotFoundError(
                 f"Did not find water bottle image at {water_bottle_path}"
             )
+        if not os.path.exists(water_glass_path):
+            raise FileNotFoundError(
+                f"Did not find water glass image at {water_glass_path}"
+            )
 
         self.water_bottle = Image.open(water_bottle_path).convert("RGBA")
+        self.water_glass = Image.open(water_glass_path).convert("RGBA")
 
     def process(
         self,
@@ -48,19 +53,24 @@ class WaterBottleImageProcessor:
             # Scaling the water bottle image to fit the bounding box
             # but keeping the aspect ratio
             aspect_ratio_bottle = self.water_bottle.height / self.water_bottle.width
+            aspect_ratio_glass = self.water_glass.height / self.water_glass.width
             aspect_ratio_target = height / width
 
-            if(aspect_ratio_bottle > aspect_ratio_target):
-                scale_factor = width / self.water_bottle.width
+            #choose image with ratio that is closer to the target
+            fitting_replacement = self.water_glass if abs(aspect_ratio_glass - aspect_ratio_target) < abs(aspect_ratio_bottle - aspect_ratio_target) else self.water_bottle
+            aspect_ratio_fitting_replacement = aspect_ratio_glass if fitting_replacement == self.water_glass else aspect_ratio_bottle
+
+            if(aspect_ratio_fitting_replacement > aspect_ratio_target):
+                scale_factor = width / fitting_replacement.width
                 target_width = width
-                target_height = int(self.water_bottle.height * scale_factor)
+                target_height = int(fitting_replacement.height * scale_factor)
             else:
-                scale_factor = height / self.water_bottle.height
+                scale_factor = height / fitting_replacement.height
                 target_height = height
-                target_width = int(self.water_bottle.width * scale_factor)
+                target_width = int(fitting_replacement.width * scale_factor)
 
             # Resize bottle to fit the bounding box
-            resized_water_bottle = self.water_bottle.resize(
+            resized_replacement = fitting_replacement.resize(
                 (target_width, target_height),
                 Image.Resampling.LANCZOS,
             )
@@ -69,6 +79,6 @@ class WaterBottleImageProcessor:
             paste_y = y1 + (y2 - y1 - target_height) // 2
 
             # Paste the bottle on the image using the alpha channel as mask
-            image.paste(resized_water_bottle, (paste_x, paste_y), resized_water_bottle)
+            image.paste(resized_replacement, (paste_x, paste_y), resized_replacement)
 
         return image.convert("RGB")
