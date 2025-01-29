@@ -1,5 +1,6 @@
 # Object recognition service 
-
+Service for object recognition and image procesing  using YOLOWorld.
+ 
 ## Quickstart
 To setup a new venv for development you can use `venv` command:
 ```sh

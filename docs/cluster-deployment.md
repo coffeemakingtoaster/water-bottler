@@ -1,8 +1,6 @@
 # Cluster Deployment
 
 ## Table of contents
-- [Cluster Deployment](#cluster-deployment)
-  - [Table of contents](#table-of-contents)
 - [Bare Metal installation](#bare-metal-installation)
   - [Disable swap](#disable-swap)
   - [Install containerd](#install-containerd)
@@ -218,7 +216,7 @@ k8s-node-01   Ready    <none>          3d4h   v1.32.1
 k8s-node-02   Ready    <none>          3d4h   v1.32.1
 ```
 
-We recomment to use k9s to monitor the cluster, as it is most superior to the kubectl command and also improves terminal-only workflows.
+We recommend to use k9s to monitor the cluster, as it is most superior to the kubectl command and also improves terminal-only workflows.
 ![k9s_HealthyCluster](./images/k9s_HealthyCluster.png)
 
 # Troubleshooting

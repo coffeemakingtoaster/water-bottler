@@ -1,34 +1,26 @@
-# Local dev
-
-
+# Local Development
 ## Docker compose
 
-There is a small docker compose setup for the application. However, development using docker compose should only be used when development using minikube is not possible.
+There is a small docker compose setup for the application. However, **development using docker compose should only be used when development using minikube is not possible**.
 
 ### Requirements
-
-Its docker compose...so you need:
-
 - [docker](https://docs.docker.com/engine/install/)
 
 ### Running the application
-
 ```sh
 docker compose up -d
 ```
 
-This should start all services. Relevant ports are:
-
+This should start all services. 
+Relevant ports are:
 - 8081 (upload service)
 - 3111 (rabbitmq web interface with login values water:bottler)
 - 80 (smtp4dev web interface)
 
 ## k8s
-
 To enable local development, that already takes the k8s deployment into consideration we use minikube.
 
 ### Requirements
-
 Therefor the following must be installed:
 
 - [Minikube](https://github.com/kubernetes/minikube)
@@ -37,14 +29,12 @@ Therefor the following must be installed:
 - [helm]()
 
 ### Starting
-
 Start your local cluster using minikube:
 
 ```sh
 minikube start 
 ```
-
-    Optionally you can specify the resource amount the cluster should use. Use `minikube start --help` for more information.
+Optionally you can specify the resource amount the cluster should use. Use `minikube start --help` for more information.
 
 Build all images of local services into the cluster using the script:
 
@@ -90,9 +80,10 @@ For further info on ingresses in minikube see the [docs](https://kubernetes.io/d
 </details>
 
 ### Using the application
-
 To upload an image an API request has to be send to the upload service.
+
 After processing the image can be downloaded from the download service using the url received via email.
+
 In a local development environment the steps are the following:
 
 1. Ensure that port forwarding is set up. We will use port mapping equal to the docker compose stack:
