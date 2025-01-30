@@ -4,6 +4,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 
 	"github.com/minio/minio-go"
 	log "github.com/rs/zerolog/log"
@@ -41,6 +42,11 @@ func downloadFile(w http.ResponseWriter, r *http.Request, minioClient *minio.Cli
 	}
 	// Set the content type
 	w.Header().Set("Content-Type", "application/octet-stream")
+
+	//set filename
+	fileExtension := filepath.Ext(fileName)
+	w.Header().Set("Content-Disposition", `attachment; filename="download`+fileExtension+`"`)
+
 	// Copy the object to the response writer
 	log.Debug().Str("file", fileName).Msg("Downloading file")
 	_, err = io.Copy(w, obj)
