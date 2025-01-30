@@ -45,7 +45,7 @@ func downloadFile(w http.ResponseWriter, r *http.Request, minioClient *minio.Cli
 
 	//set filename
 	fileExtension := filepath.Ext(fileName)
-    w.Header().Set("Content-Disposition", `attachment; filename="download`+fileExtension+`"`)
+	w.Header().Set("Content-Disposition", `attachment; filename="download`+fileExtension+`"`)
 
 	// Copy the object to the response writer
 	log.Debug().Str("file", fileName).Msg("Downloading file")
